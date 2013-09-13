@@ -1,24 +1,35 @@
-" Testing functions that test this plugin.
-" Some circular logic is needed as this plugin is used to test itself.  
+" File: autoload/tests/test_the_tests.vim {{{
+" Author: Kevin Biskar
+
+" Overview:
+"     These are the testing functions that test this plugin. Some circular
+" logic is needed as this plugin is used to test itself.  
+
+if exists('did_auto_test_the_tests') || &cp || version < 700
+    finish
+endif
+let did_auto_test_the_tests = 1
+" }}}
 
 " Unit Tests {{{
+" For autoload/ulti_test_utility.vim {{{
 " Test_Is_True {{{
 function! tests#test_the_tests#Test_Is_True()
     call UltiTestStart("Is True", 7)
 
     call UltiAssertEquals(ulti_test_utility#Is_True(1), 1, 'true')
     call UltiAssertEquals(ulti_test_utility#Is_True(0), 0, 'true')
-    call UltiAssertEquals(ulti_test_utility#Is_True(2.0), -1, 'true')
     call UltiAssertEquals(ulti_test_utility#Is_True('string'), 0, 'true')
-    call UltiAssertEquals(ulti_test_utility#Is_True([]), -1, 'true')
-    call UltiAssertEquals(ulti_test_utility#Is_True([1]), -1, 'true')
-    call UltiAssertEquals(ulti_test_utility#Is_True({}), -1, 'true')
+
+    call UltiAssertException('ulti_test_utility#Is_True', [2.0], 'true')
+    call UltiAssertException('ulti_test_utility#Is_True', [], 'true')
+    call UltiAssertException('ulti_test_utility#Is_True', [1], 'false')
+    call UltiAssertException('ulti_test_utility#Is_True', {}, 'true')
 
     call UltiTestStop()
     call UltiTestReport()
 endfunction
 " }}}
-
 " Test_Is_Empty {{{
 function! tests#test_the_tests#Test_Is_Empty()
     call UltiTestStart("Is Empty", 7)
@@ -33,13 +44,12 @@ function! tests#test_the_tests#Test_Is_Empty()
     call UltiAssertTrue(ulti_test_utility#Is_Empty({}), 'true')
     call UltiAssertTrue(ulti_test_utility#Is_Empty({'Test': 'Case'}), 'false')
     " Other
-    call UltiAssertTrue(ulti_test_utility#Is_Empty(0) == -1, 'true')
+    call UltiAssertException('ulti_test_utility#Is_Empty', [0], 'true')
 
     call UltiTestStop()
     call UltiTestReport()
 endfunction
 " }}}
-
 " Test_Is_Equals {{{
 function! tests#test_the_tests#Test_Is_Equals()
     call UltiTestStart("Is Equals", 16)
@@ -86,7 +96,6 @@ function! tests#test_the_tests#Test_Is_Equals()
     call UltiTestReport()
 endfunction
 " }}}
-
 " Test_In_List {{{
 function! tests#test_the_tests#Test_In_List()
     call UltiTestStart("In List")
@@ -124,7 +133,65 @@ function! tests#test_the_tests#Test_In_List()
     call UltiTestReport()
 endfunction
 " }}}
+" Test_In_String {{{
+function! tests#test_the_tests#Test_In_String()
+    call UltiTestStart("In String", 8)
 
+    " Simple
+    call UltiAssertTrue(ulti_test_utility#In_String('string', 'string'), 'true')
+    call UltiAssertTrue(ulti_test_utility#In_String('', 'string'), 'true')
+    call UltiAssertTrue(ulti_test_utility#In_String('string', 'big strings'), 'true')
+    call UltiAssertTrue(ulti_test_utility#In_String('strings', 'big string'), 'false')
+    call UltiAssertTrue(ulti_test_utility#In_String('String', 'big string'), 'false')
+
+    " Exceptions
+    call UltiAssertException("ulti_test_utility#In_String", [1, [1]],
+                \ 'true')
+    call UltiAssertException("ulti_test_utility#In_String", [1, 1],
+                \ 'true')
+
+    " Regex
+    call UltiAssertTrue(ulti_test_utility#In_String('\v\d{4}', 'a12b1234'), 'true')
+
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
+" Test_In_Output {{{
+function! tests#test_the_tests#Test_In_Output()
+    call UltiTestStart("In Output", 6)
+
+    call UltiAssertTrue(ulti_test_utility#In_Output(
+                \ "tests#test_the_tests#EchoHello", [], 'Hello'), 'true')
+    call UltiAssertTrue(ulti_test_utility#In_Output(
+                \ "tests#test_the_tests#EchoHello", [], 'Bye'), 'false')
+    call UltiAssertTrue(ulti_test_utility#In_Output(
+                \ "tests#test_the_tests#EchomHello", [], 'Hello'), 'true')
+    call UltiAssertTrue(ulti_test_utility#In_Output(
+                \ "tests#test_the_tests#EchomHello", [], 'Bye'), 'false')
+    call UltiAssertTrue(ulti_test_utility#In_Output(
+                \ "tests#test_the_tests#EchoBye", [], 'Bye'), 'true')
+    call UltiAssertTrue(ulti_test_utility#In_Output(
+                \ "tests#test_the_tests#EchoBye", [], 'Hello'), 'false')
+
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
+" Test_In_Buffer {{{
+function! tests#test_the_tests#Test_In_Buffer()
+    call UltiTestStart("In Buffer", 2)
+
+    call UltiAssertTrue(ulti_test_utility#In_Buffer('xxxxxxx'), 'false')
+    " Adding Text and Testing Again
+    normal ixxxxxxx
+    call UltiAssertTrue(ulti_test_utility#In_Buffer('xxxxxxx'), 'true')
+    normal 7hd7l
+
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
 " Test_Key_In_Dict {{{
 function! tests#test_the_tests#Test_Key_In_Dict()
     call UltiTestStart("Key In Dict", 5)
@@ -144,7 +211,6 @@ function! tests#test_the_tests#Test_Key_In_Dict()
     call UltiTestReport()
 endfunction
 " }}}
-
 " Test_Value_In_Dict {{{
 function! tests#test_the_tests#Test_Value_In_Dict()
     call UltiTestStart('Value In Dict', 7)
@@ -168,4 +234,81 @@ function! tests#test_the_tests#Test_Value_In_Dict()
     call UltiTestReport()
 endfunction
 " }}}
+" }}}
+
+" For plugin/ulti_test.vim {{{
+
+" Test_Assert_In_String {{{
+function! tests#test_the_tests#Test_Assert_In_String()
+    call UltiTestStart('Assert In String')
+
+    call UltiAssertTrue((UltiAssertInString()), 'true', 'skip')
+
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
+
+" Test_Assert_In_Output {{{
+function! tests#test_the_tests#Test_Assert_In_Output()
+    call UltiTestStart('Assert In Output')
+
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
+
+" Test_Assert_True {{{
+function! tests#test_the_tests#Test_Assert_True()
+    call UltiTestStart('Assert True')
+
+
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
+
+" Test_Assert_Equals {{{
+function! tests#test_the_tests#Test_Assert_Equals()
+    call UltiTestStart('Assert Equals')
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
+
+" Test_Assert_Empty {{{
+function! tests#test_the_tests#Test_Assert_Empty()
+    call UltiTestStart('Assert Empty')
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
+
+" Test_Assert_Exception {{{
+function! tests#test_the_tests#Test_Assert_Exception()
+    call UltiTestStart('Assert Exception')
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
+" }}}
+" }}}
+
+" Sample functions for use with testing {{{
+function! tests#test_the_tests#EchoHello()
+    echo "Hello"
+endfunction
+
+function! tests#test_the_tests#EchomHello()
+    echom "Hellom"
+endfunction
+
+function! tests#test_the_tests#EchoBye()
+    echo "Bye"
+endfunction
+
+function!tests#test_the_tests#InsertHello()
+    execute 'normal iHello'
+endfunction
+    
 " }}}
