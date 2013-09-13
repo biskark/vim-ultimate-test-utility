@@ -27,7 +27,8 @@ endfunction
 " }}}
 
 " Is_Empty() {{{
-" Returns 1 if the string, list or dictionary is empty, 0 if not, -1 if not string
+" Returns 1 if the string, list or dictionary is empty,
+" 0 if not, -1 if not string
 function! ulti_test_utility#Is_Empty(item)
     if type(a:item) ==# type("item")
         return a:item ==# '' ? 1 : 0

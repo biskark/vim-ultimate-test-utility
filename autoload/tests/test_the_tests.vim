@@ -2,9 +2,26 @@
 " Some circular logic is needed as this plugin is used to test itself.  
 
 " Unit Tests {{{
+" Test_Is_True {{{
+function! tests#test_the_tests#Test_Is_True()
+    call UltiTestStart("Is_True", 7)
+
+    call UltiAssertEquals(ulti_test_utility#Is_True(1), 1, 'true')
+    call UltiAssertEquals(ulti_test_utility#Is_True(0), 0, 'true')
+    call UltiAssertEquals(ulti_test_utility#Is_True(2.0), -1, 'true')
+    call UltiAssertEquals(ulti_test_utility#Is_True('string'), 0, 'true')
+    call UltiAssertEquals(ulti_test_utility#Is_True([]), -1, 'true')
+    call UltiAssertEquals(ulti_test_utility#Is_True([1]), -1, 'true')
+    call UltiAssertEquals(ulti_test_utility#Is_True({}), -1, 'true')
+
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
+
 " Test_Is_Empty {{{
 function! tests#test_the_tests#Test_Is_Empty()
-    call UltiTestStart(8)
+    call UltiTestStart("Is Empty", 7)
 
     " Strings call UltiAssertTrue(ulti_test_utility#Is_Empty(""), 'true')
     call UltiAssertTrue(ulti_test_utility#Is_Empty("T"), 'false')
@@ -25,7 +42,7 @@ endfunction
 
 " Test_Is_Equals {{{
 function! tests#test_the_tests#Test_Is_Equals()
-    call UltiTestStart(16)
+    call UltiTestStart("Is Equals", 16)
 
     " Strings
     call UltiAssertTrue(ulti_test_utility#Is_Equals("string", "string"),
@@ -70,26 +87,9 @@ function! tests#test_the_tests#Test_Is_Equals()
 endfunction
 " }}}
 
-" Test_Is_True {{{
-function! tests#test_the_tests#Test_Is_True()
-    call UltiTestStart()
-
-    call UltiAssertEquals(ulti_test_utility#Is_True(1), 1, 'true')
-    call UltiAssertEquals(ulti_test_utility#Is_True(0), 0, 'true')
-    call UltiAssertEquals(ulti_test_utility#Is_True(2.0), -1, 'true')
-    call UltiAssertEquals(ulti_test_utility#Is_True('string'), 0, 'true')
-    call UltiAssertEquals(ulti_test_utility#Is_True([]), -1, 'true')
-    call UltiAssertEquals(ulti_test_utility#Is_True([1]), -1, 'true')
-    call UltiAssertEquals(ulti_test_utility#Is_True({}), -1, 'true')
-
-    call UltiTestStop()
-    call UltiTestReport()
-endfunction
-" }}}
-
 " Test_In_List {{{
 function! tests#test_the_tests#Test_In_List()
-    call UltiTestStart()
+    call UltiTestStart("In_List")
 
     " Simple
     call UltiAssertTrue(ulti_test_utility#In_List('string', ['string']), 'true')
@@ -113,12 +113,38 @@ function! tests#test_the_tests#Test_In_List()
                 \ [{'test': 'case'}, 'string']), 'false')
 
     " Exceptions
-    call UltiAssertException("E714", "ulti_test_utility#In_List", [1, 2],
+    call UltiAssertException("ulti_test_utility#In_List", [1, [1]],
+                \ 'false')
+    call UltiAssertException("ulti_test_utility#In_List", [1, 1],
                 \ 'true')
-    " call ulti_test_utility#In_List(1, 'kevin')
+    call UltiAssertException("ulti_test_utility#In_List", [1],
+                \ 'true')
 
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
 
+" Test_Key_In_Dict {{{
+function! tests#test_the_tests#Test_Key_In_Dict()
+    call UltiTestStart("Key In Dict")
 
+    call UltiAssertTrue(ulti_test_utility#Key_In_Dict('string',
+                \ {'string': 'test'}), 'true')
+    call UltiAssertTrue(ulti_test_utility#Key_In_Dict('string',
+                \ {'test': 'string'}), 'false')
+    call UltiAssertTrue(ulti_test_utility#Key_In_Dict(1,
+                \ {1: ''}), 'true', 'skip')
+
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
+
+" Test_Value_In_Dict {{{
+function! tests#test_the_tests#Test_Value_In_Dict()
+    throw "Not Implemented"
+    call UltiTestStart()
     call UltiTestStop()
     call UltiTestReport()
 endfunction
