@@ -69,5 +69,16 @@ endfunction
 function! ulti_test_utility#Value_In_Dict(item, dict)
     return ulti_test_utility#In_List(a:item, values(a:dict))
 endfunction
+" }}}
+
+" In_String() {{{
+" Takes a substring and returns a boolean value for its presence in string
+function! ulti_test_utility#In_String(sub, string)
+    let local = &magic
+    if match(a:string, a:sub) >= 0
+        return 1
+    return 0
+endfunction
+" }}}
 
 " End Utility Functions }}}

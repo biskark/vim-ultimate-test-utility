@@ -11,7 +11,7 @@ nnoremap <silent> <leader><space>
 
 " Global Variables {{{
 if !exists('g:ulti_test_verbose')
-    let g:ulti_test_verbose = 1
+    let g:ulti_test_verbose = 0
 endif
 " }}}
 
@@ -24,6 +24,7 @@ let s:locked = 1
 
 " These values are reset in UltiStartTests
 let s:test_counter = 0
+let s:name_of_test = ''
 let s:number_expected_tests = -1
 let s:number_passed_tests = 0
 let s:number_failed_tests = 0
@@ -188,7 +189,7 @@ function! s:Test_Retval(retval, expectation, name, ...)
     if a:0 == 1 && a:1 ==# 'skip'
         if g:ulti_test_verbose
             echom " "
-            echom "Sub-Test " . num_performed . ' "' . a:name . '" was skipped.'
+            echom 'Test "' . s:name_of_test . '": Sub-Test ' . (num_performed) + 1 . ' "' . a:name . '" was skipped.'
             echom " "
         endif
         let s:number_skipped_tests += 1
@@ -196,14 +197,14 @@ function! s:Test_Retval(retval, expectation, name, ...)
         if a:retval == xval
             if g:ulti_test_verbose
                 echom " "
-                echom "Sub-Test " . num_performed . ":"
+                echom 'Test "' . s:name_of_test . '": Sub-Test ' . (num_performed + 1) . ":"
                 echom s:SUCCESS_MSG . ": " . a:name . " was " . a:expectation . "."
                 echom " "
             endif
             let s:number_passed_tests += 1
         else
             echom " "
-            echom "Sub-Test " . num_performed . ":"
+            echom 'Test "' . s:name_of_test . '": Sub-Test ' . (num_performed + 1) . ":"
             echom s:FAIL_MSG . ": " . a:name . " was " . a:expectation . "."
             echom " "
             let s:number_failed_tests += 1

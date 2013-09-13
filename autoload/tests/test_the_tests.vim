@@ -4,7 +4,7 @@
 " Unit Tests {{{
 " Test_Is_True {{{
 function! tests#test_the_tests#Test_Is_True()
-    call UltiTestStart("Is_True", 7)
+    call UltiTestStart("Is True", 7)
 
     call UltiAssertEquals(ulti_test_utility#Is_True(1), 1, 'true')
     call UltiAssertEquals(ulti_test_utility#Is_True(0), 0, 'true')
@@ -89,7 +89,7 @@ endfunction
 
 " Test_In_List {{{
 function! tests#test_the_tests#Test_In_List()
-    call UltiTestStart("In_List")
+    call UltiTestStart("In List")
 
     " Simple
     call UltiAssertTrue(ulti_test_utility#In_List('string', ['string']), 'true')
@@ -127,14 +127,18 @@ endfunction
 
 " Test_Key_In_Dict {{{
 function! tests#test_the_tests#Test_Key_In_Dict()
-    call UltiTestStart("Key In Dict")
+    call UltiTestStart("Key In Dict", 5)
 
     call UltiAssertTrue(ulti_test_utility#Key_In_Dict('string',
                 \ {'string': 'test'}), 'true')
     call UltiAssertTrue(ulti_test_utility#Key_In_Dict('string',
                 \ {'test': 'string'}), 'false')
     call UltiAssertTrue(ulti_test_utility#Key_In_Dict(1,
-                \ {1: ''}), 'true', 'skip')
+                \ {1: ''}), 'false')
+    call UltiAssertTrue(ulti_test_utility#Key_In_Dict('1',
+                \ {1: ''}), 'true')
+    call UltiAssertException('ulti_test_utility#Key_In_Dict', [[1,2], [2]],
+                \ 'true')
 
     call UltiTestStop()
     call UltiTestReport()
@@ -143,8 +147,23 @@ endfunction
 
 " Test_Value_In_Dict {{{
 function! tests#test_the_tests#Test_Value_In_Dict()
-    throw "Not Implemented"
-    call UltiTestStart()
+    call UltiTestStart('Value In Dict', 7)
+
+    call UltiAssertTrue(ulti_test_utility#Value_In_Dict('string',
+                \ {'string': 'test'}), 'false')
+    call UltiAssertTrue(ulti_test_utility#Value_In_Dict('string',
+                \ {'test': 'string'}), 'true')
+    call UltiAssertTrue(ulti_test_utility#Value_In_Dict(1,
+                \ {1: ''}), 'false')
+    call UltiAssertTrue(ulti_test_utility#Value_In_Dict(1,
+                \ {'key': 1}), 'true')
+    call UltiAssertTrue(ulti_test_utility#Value_In_Dict(1,
+                \ {'key': '1'}), 'false')
+    call UltiAssertTrue(ulti_test_utility#Value_In_Dict('1',
+                \ {'key': 1}), 'false')
+    call UltiAssertException('ulti_test_utility#Value_In_Dict', [[1,2], [2]],
+                \ 'true')
+
     call UltiTestStop()
     call UltiTestReport()
 endfunction
