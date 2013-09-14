@@ -21,10 +21,10 @@ function! tests#test_the_tests#Test_Is_True()
     call UltiAssertEquals(ulti_test_utility#Is_True(0), 0, 'true')
     call UltiAssertEquals(ulti_test_utility#Is_True('string'), 0, 'true')
 
-    call UltiAssertException('ulti_test_utility#Is_True', [2.0], 'true')
-    call UltiAssertException('ulti_test_utility#Is_True', [], 'true')
-    call UltiAssertException('ulti_test_utility#Is_True', [1], 'false')
-    call UltiAssertException('ulti_test_utility#Is_True', {}, 'true')
+    call UltiAssertException("Improper Argument", 'ulti_test_utility#Is_True', [2.0], 'true')
+    call UltiAssertException("Not enough arguments", 'ulti_test_utility#Is_True', [], 'true')
+    call UltiAssertException("", 'ulti_test_utility#Is_True', [1], 'false')
+    call UltiAssertException("Improper Argument", 'ulti_test_utility#Is_True', [{}], 'true')
 
     call UltiTestStop()
     call UltiTestReport()
@@ -44,7 +44,7 @@ function! tests#test_the_tests#Test_Is_Empty()
     call UltiAssertTrue(ulti_test_utility#Is_Empty({}), 'true')
     call UltiAssertTrue(ulti_test_utility#Is_Empty({'Test': 'Case'}), 'false')
     " Other
-    call UltiAssertException('ulti_test_utility#Is_Empty', [0], 'true')
+    call UltiAssertException('Improper Argument', 'ulti_test_utility#Is_Empty', [0], 'true')
 
     call UltiTestStop()
     call UltiTestReport()
@@ -122,11 +122,11 @@ function! tests#test_the_tests#Test_In_List()
                 \ [{'test': 'case'}, 'string']), 'false')
 
     " Exceptions
-    call UltiAssertException("ulti_test_utility#In_List", [1, [1]],
+    call UltiAssertException('List required', "ulti_test_utility#In_List", [1, [1]],
                 \ 'false')
-    call UltiAssertException("ulti_test_utility#In_List", [1, 1],
+    call UltiAssertException('List required', "ulti_test_utility#In_List", [1, 1],
                 \ 'true')
-    call UltiAssertException("ulti_test_utility#In_List", [1],
+    call UltiAssertException('Not enough arguments', "ulti_test_utility#In_List", [1],
                 \ 'true')
 
     call UltiTestStop()
@@ -145,9 +145,9 @@ function! tests#test_the_tests#Test_In_String()
     call UltiAssertTrue(ulti_test_utility#In_String('String', 'big string'), 'false')
 
     " Exceptions
-    call UltiAssertException("ulti_test_utility#In_String", [1, [1]],
+    call UltiAssertException('Improper Argument', "ulti_test_utility#In_String", [1, [1]],
                 \ 'true')
-    call UltiAssertException("ulti_test_utility#In_String", [1, 1],
+    call UltiAssertException('Improper Argument', "ulti_test_utility#In_String", [1, 1],
                 \ 'true')
 
     " Regex
@@ -204,7 +204,7 @@ function! tests#test_the_tests#Test_Key_In_Dict()
                 \ {1: ''}), 'false')
     call UltiAssertTrue(ulti_test_utility#Key_In_Dict('1',
                 \ {1: ''}), 'true')
-    call UltiAssertException('ulti_test_utility#Key_In_Dict', [[1,2], [2]],
+    call UltiAssertException('Dictionary required', 'ulti_test_utility#Key_In_Dict', [[1,2], [2]],
                 \ 'true')
 
     call UltiTestStop()
@@ -227,7 +227,7 @@ function! tests#test_the_tests#Test_Value_In_Dict()
                 \ {'key': '1'}), 'false')
     call UltiAssertTrue(ulti_test_utility#Value_In_Dict('1',
                 \ {'key': 1}), 'false')
-    call UltiAssertException('ulti_test_utility#Value_In_Dict', [[1,2], [2]],
+    call UltiAssertException("Dictionary required", 'ulti_test_utility#Value_In_Dict', [[1,2], [2]],
                 \ 'true')
 
     call UltiTestStop()

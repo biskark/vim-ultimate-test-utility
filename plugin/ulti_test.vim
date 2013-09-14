@@ -83,15 +83,21 @@ endfunction
 " }}}
 " UltiAssertException {{{
 " Test if given function, submitted as a STRING, throws an exception
+" The execption expected is the error argument.
 " Needs Arguments as a List, not individually
-function! UltiAssertException(fx, arguments, expectation, ...)
+function! UltiAssertException(error, fx, arguments, expectation, ...)
     let skip = a:0 > 0 ? a:1 : ""
     let Fx = function(a:fx)
     let retval = 0
     try
         call call(Fx, a:arguments)
     catch
-        let retval = 1
+        if ulti_test_utility#In_String(a:error, v:exception)
+            let retval = 1
+        else
+            echo "Caught wrong exception. '" . v:exception . "' thrown instead."
+            throw v:exception
+        endif
     endtry
     call s:Test_Retval(retval, a:expectation, 'AssertException', skip)
 endfunction
