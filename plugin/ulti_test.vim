@@ -23,18 +23,16 @@ nnoremap <silent> <leader><space>
 if !exists('g:ulti_test_verbose')
     let g:ulti_test_verbose = 0
 endif
+if !exists('g:ulti_test_rethrow')
+    let g:ulti_test_rethrow = 0
+endif
 " }}}
 
 " Script Variables {{{
-let s:SUCCESS_MSG = "Ulti Test Expection Met"
-let s:FAIL_MSG = "Ulti Test Expection Not Met"
-let s:SKIP_MSG = "Ulti Test Skipped"
-let s:LOCKED_MSG = "Must call UltiStartTests() first"
 let s:locked = 1
+let s:test_counter = 0
 
 " These values are reset in UltiStartTests
-let s:test_counter = 0
-let s:name_of_test = ''
 let s:number_expected_tests = -1
 let s:number_passed_tests = 0
 let s:number_failed_tests = 0
@@ -47,59 +45,66 @@ let s:number_skipped_tests = 0
 " A simple assertion of a substring match. For checks the output rather than a
 " returned string.
 " For checking output, use UltiAssertInOutput.
-function! UltiAssertTrue(item, expectation, ...)
+" desc is a user message that describes the test being run.
+function! UltiAssertTrue(desc, item, expectation, ...)
     let skip = a:0 > 0 ? a:1 : ""
     call s:Test_Retval(ulti_test_utility#Is_True(a:item),
-                \ a:expectation, 'AssertTrue', skip)
+                \ a:expectation, a:desc, skip)
 endfunction
 " }}}
 " UltiAssertInOutput {{{
-function! UltiAssertInOutput(fx, arguments, string, expectation, ...)
+function! UltiAssertInOutput(desc, fx, arguments, string, expectation, ...)
 endfunction
 " }}}
 " UltiAssertTrue {{{
 " Follows the vim definition of true which means all strings are false
-function! UltiAssertTrue(item, expectation, ...)
+function! UltiAssertTrue(desc, item, expectation, ...)
     let skip = a:0 > 0 ? a:1 : ""
     call s:Test_Retval(ulti_test_utility#Is_True(a:item),
-                \ a:expectation, 'AssertTrue', skip)
+                \ a:expectation, a:desc, skip)
 endfunction
 " }}}
 " UltiAssertEquals {{{
 " Tests two items equivalence
-function! UltiAssertEquals(first, second, expectation, ...)
+function! UltiAssertEquals(desc, first, second, expectation, ...)
     let skip = a:0 > 0 ? a:1 : ""
     call s:Test_Retval(ulti_test_utility#Is_Equals(a:first, a:second),
-                \ a:expectation, 'AssertEquals', skip)
+                \ a:expectation, a:desc, skip)
 endfunction
 " }}}
 " UltiAssertEmpty {{{
 " Test if string, list, or dictionary is empty
-function! UltiAssertEmpty(item, expectation, ...)
+function! UltiAssertEmpty(desc, item, expectation, ...)
     let skip = a:0 > 0 ? a:1 : ""
     call s:Test_Retval(ulti_test_utility#Is_Empty(a:item),
-                \ a:expectation, 'AssertEmpty', skip)
+                \ a:expectation, a:desc, skip)
 endfunction
 " }}}
 " UltiAssertException {{{
 " Test if given function, submitted as a STRING, throws an exception
 " The execption expected is the error argument.
 " Needs Arguments as a List, not individually
-function! UltiAssertException(error, fx, arguments, expectation, ...)
+function! UltiAssertException(desc, error, fx, arguments, expectation, ...)
     let skip = a:0 > 0 ? a:1 : ""
     let Fx = function(a:fx)
     let retval = 0
+    let error = 0
     try
         call call(Fx, a:arguments)
     catch
         if ulti_test_utility#In_String(a:error, v:exception)
             let retval = 1
         else
-            echo "Caught wrong exception. '" . v:exception . "' thrown instead."
-            throw v:exception
+            error = 1
+            if g:ulti_test_rethrow
+                throw v:exception
+            endif
         endif
     endtry
-    call s:Test_Retval(retval, a:expectation, 'AssertException', skip)
+    call s:Test_Retval(retval, a:expectation, a:desc, skip)
+    if error
+        echom "    Unexpected Exception thrown: " . v:exception
+    endif
 endfunction
 " }}}
 " End Assertion Functions }}}
@@ -108,65 +113,84 @@ endfunction
 " UltiTestStart {{{
 " Function that resets counter variables and allows Ulti Asserts to be run.
 " Takes an optional argument that tells how many tests it expects to run.
-function! UltiTestStart(name, ...)
+function! UltiTestStart(...)
     let s:test_counter += 1
     let s:locked = 0
     let s:number_expected_tests = -1
     let s:number_passed_tests = 0
     let s:number_failed_tests = 0
     let s:number_skipped_tests = 0
-    let s:name_of_test = a:name
+    echom " "
+    echom "Test " . s:test_counter . " Started"
     if a:0 == 0
         let s:number_expected_tests = -1
-    elseif a:0 == 1 && type(a:1) == type(1)
+    elseif a:0 == 1 && type(a:1) == type(1) && a:1 >= 0
         let s:number_expected_tests = a:1
     else
-        throw "Improper Test Specification"
+        throw "UltiTestStart Error: If plan given, must be an integer >= 0."
     endif
 endfunction
 " }}}
 " UltiTestStop {{{
 " Function that locks up the testing suite
 function! UltiTestStop()
+    echom "Test " . s:test_counter . " Stopped"
     let s:locked = 1
+endfunction
+" }}}
+" UltiTestReset {{{
+" Function that resets variables
+function! UltiTestReset()
+    if s:locked != 1
+        throw "UltiTest: Cannot reset while running a test."
+    endif
+    let s:test_counter = 0
+    echom "UltiTestUtility Reset"
 endfunction
 " }}}
 " UltiTestReport {{{
 " Function that echom's a report of all the most recently run tests
 function! UltiTestReport()
+    let message = ''
     if s:locked != 1
-        throw "Cannot report while tests are open."
+        throw "UltiTestReport: Cannot report while tests are open."
     endif
 
     if s:number_expected_tests == -1
         let s:number_expected_tests = 'Not Specified'
     endif
 
-    echom " "
-    echom " "
-    echom "Ultimate Unit Test Results"
-    echom "--------------------------"
-    echom " "
-    echom "Test " . s:test_counter . ": " . '"' . s:name_of_test . '"' 
-    echom " "
-    if ((s:number_passed_tests + s:number_failed_tests)
-                \ != s:number_expected_tests)
-                \ && s:number_expected_tests != -1
-        echom "Test Expectations Not Met!"
-        echom "Sub-Tests Performed: " .
-                    \ (s:number_passed_tests + s:number_failed_tests)
-    endif
-    echom "Sub-Tests Expected:  " . s:number_expected_tests
-    echom " "
+    echom "Test " . s:test_counter . " Results"
+    echom "    Expected: " . s:number_expected_tests .
+                \ ", Passed: "  . s:number_passed_tests .
+                \ ", Failed: "  . s:number_failed_tests .
+                \ ", Skipped: " . s:number_skipped_tests
 
-    echom "Sub-Tests Passed:   " . s:number_passed_tests
-    echom "Sub-Tests Failed:   " . s:number_failed_tests
-    echom "Sub-Tests Skipped:  " . s:number_skipped_tests
-
-    if s:number_failed_tests == 0
-        echom " "
-        echom "All Sub-Tests Passed"
+    if s:number_failed_tests > 0
+        let message = "Did not pass all sub-tests."
+    else
+        let message = "All sub-tests attempted passed."
     endif
+
+    if s:number_skipped_tests > 0
+        let message .= " " . s:number_skipped_tests . " skipped."
+    else
+        let message .= " 0 sub-tests skipped."
+    endif
+
+    let num_performed = (s:number_failed_tests +
+                \ s:number_passed_tests + s:number_skipped_tests)
+
+    if s:number_expected_tests >= 0 && s:number_expected_tests != num_performed
+        if s:number_expected_tests > num_performed
+            let message .= " " . (s:number_expected_tests - num_performed)
+                        \ . " sub-test(s) missed."
+        else
+            let message .= " " . (num_performed - s:number_expected_tests)
+                        \ . " extra sub-test(s) performed."
+        endif
+    endif
+    echom message
 endfunction
 " }}}
 " UltiTestSelfUnit {{{
@@ -190,6 +214,8 @@ function! UltiTestSelfUnit()
     call tests#test_the_tests#Test_Assert_Equals()
     call tests#test_the_tests#Test_Assert_Empty()
     call tests#test_the_tests#Test_Assert_Exception()
+
+    call UltiTestReset()
     " }}}
 endfunction
 " }}}
@@ -204,9 +230,11 @@ endfunction
 " Arguments:
 " retval: (the result of an UltiAssert),
 " a user given expectation (either 'true' or 'false') for the test,
-" the name of the test (given by the calling UltiAssert),
-" and an optional flag that signifies if the test should be skipped.
-function! s:Test_Retval(retval, expectation, name, ...)
+" the message of the test (given by the calling UltiAssert),
+" a flag that signifies if the test should be skipped, and
+" an optional error message if something unexpected happened (like an 
+" exception that shouldn't have been caught)
+function! s:Test_Retval(retval, expectation, message, skip)
     if s:locked
         throw s:LOCKED_MSG
     endif
@@ -219,28 +247,23 @@ function! s:Test_Retval(retval, expectation, name, ...)
         throw "Improper Expectation Value"
     endif
 
-    if a:0 == 1 && a:1 ==# 'skip'
+    if a:skip ==# 'skip'
         if g:ulti_test_verbose
-            echom " "
-            echom 'Test "' . s:name_of_test . '" -- Sub-Test ' . (num_performed) + 1 . ' "' . a:name . '" was skipped.'
-            echom " "
+            echom "Sub-Test " . (num_performed + 1) . ': ' . a:message .
+                        \ ', skipped.'
         endif
         let s:number_skipped_tests += 1
     else
-        if a:retval == xval
+        if a:retval != xval 
+            echom "Sub-Test " . (num_performed + 1) . ': ' . a:message .
+                        \ ', failed.'
+            let s:number_failed_tests += 1
+        else
             if g:ulti_test_verbose
-                echom " "
-                echom 'Test "' . s:name_of_test . '" -- Sub-Test ' . (num_performed + 1) . ":"
-                echom s:SUCCESS_MSG . ": " . a:name . " was " . a:expectation . "."
-                echom " "
+                echom "Sub-Test " . (num_performed + 1) . ': ' . a:message .
+                            \ ', passed.'
             endif
             let s:number_passed_tests += 1
-        else
-            echom " "
-            echom 'Test "' . s:name_of_test . '" -- Sub-Test ' . (num_performed + 1) . ":"
-            echom s:FAIL_MSG . ": " . a:name . " was not " . a:expectation . "."
-            echom " "
-            let s:number_failed_tests += 1
         endif
     endif
 endfunction
