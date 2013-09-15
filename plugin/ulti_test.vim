@@ -172,11 +172,7 @@ function! UltiTestReport()
         let message = "All sub-tests attempted passed."
     endif
 
-    if s:number_skipped_tests > 0
-        let message .= " " . s:number_skipped_tests . " skipped."
-    else
-        let message .= " 0 sub-tests skipped."
-    endif
+    let message .= " " . s:number_skipped_tests . " sub-test(s) skipped."
 
     let num_performed = (s:number_failed_tests +
                 \ s:number_passed_tests + s:number_skipped_tests)

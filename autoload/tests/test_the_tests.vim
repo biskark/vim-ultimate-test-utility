@@ -127,35 +127,53 @@ endfunction
 " }}}
 " Test_In_List {{{
 function! tests#test_the_tests#Test_In_List()
-    call UltiTestStart()
+    call UltiTestStart(14)
 
     " Simple
-    call UltiAssertTrue(ulti_test_utility#In_List('string', ['string']), 'true')
-    call UltiAssertTrue(ulti_test_utility#In_List('', ['string']), 'false')
-    call UltiAssertTrue(ulti_test_utility#In_List('string', []), 'false')
-    call UltiAssertTrue(ulti_test_utility#In_List('string', ['']), 'false')
-    call UltiAssertTrue(ulti_test_utility#In_List(1, ['1']), 'false')
-    call UltiAssertTrue(ulti_test_utility#In_List(1, [1, 2, 3]), 'true')
-    call UltiAssertTrue(ulti_test_utility#In_List(1.1, [1.1, 2, 3]), 'true')
+    call UltiAssertTrue("In_List('string', ['string']) == 1",
+                \ ulti_test_utility#In_List('string', ['string']), 'true')
+    call UltiAssertTrue("In_List('', ['string']) == 0",
+                \ ulti_test_utility#In_List('', ['string']), 'false')
+    call UltiAssertTrue("In_List('string', []) == 0",
+                \ ulti_test_utility#In_List('string', []), 'false')
+    call UltiAssertTrue("In_List('string', ['']) == 0",
+                \ ulti_test_utility#In_List('string', ['']), 'false')
+    call UltiAssertTrue("In_List(1, ['1']) == 0",
+                \ ulti_test_utility#In_List(1, ['1']), 'false')
+    call UltiAssertTrue("In_List(1, [1,
+                \ 2, 3]) == 1", ulti_test_utility#In_List(1, [1, 2, 3]), 'true')
+    call UltiAssertTrue("In_List(1.1, [1.1,
+                \ 2, 3]) == 1", ulti_test_utility#In_List(1.1, [1.1, 2, 3]), 'true')
 
     " List in Lists
-    call UltiAssertTrue(ulti_test_utility#In_List(['string', 'test'],
+    call UltiAssertTrue(
+                \ "In_List(['string', 'test'], [['string', 'test']]) == 1",
+                \ ulti_test_utility#In_List(['string', 'test'],
                 \ [['string', 'test'], 'string']), 'true')
-    call UltiAssertTrue(ulti_test_utility#In_List('test',
-                \ [['string', 'test'], 'string']), 'false')
+    call UltiAssertTrue(
+                \ "In_List('test', [['string', 'test']]) == 0",
+                \ ulti_test_utility#In_List('test', [['string', 'test']]),
+                \ 'false')
 
     " Dict in Lists
-    call UltiAssertTrue(ulti_test_utility#In_List({'test': 'case'},
+    call UltiAssertTrue("In_List({'test': 'case'}, [{'test': 'case'}," . 
+                \ " 'string']) == 1",
+                \ ulti_test_utility#In_List({'test': 'case'},
                 \ [{'test': 'case'}, 'string']), 'true')
-    call UltiAssertTrue(ulti_test_utility#In_List({'test': 'no'},
+    call UltiAssertTrue("In_List({'test': 'no'}, [{'test': 'case'}," .
+                \ " 'string']) == 0",
+                \ ulti_test_utility#In_List({'test': 'no'},
                 \ [{'test': 'case'}, 'string']), 'false')
 
     " Exceptions
-    call UltiAssertException('List required', "ulti_test_utility#In_List", [1, [1]],
+    call UltiAssertException("In_List([1, [1]]) doesn't throw error",
+                \ 'List required', "ulti_test_utility#In_List", [1, [1]],
                 \ 'false')
-    call UltiAssertException('List required', "ulti_test_utility#In_List", [1, 1],
+    call UltiAssertException("In_List([1, 1]) throws error", 
+                \ 'List required', "ulti_test_utility#In_List", [1, 1],
                 \ 'true')
-    call UltiAssertException('Not enough arguments', "ulti_test_utility#In_List", [1],
+    call UltiAssertException("In_List([1]) throws 'Note enough arguments'",
+                \ 'Not enough arguments', "ulti_test_utility#In_List", [1],
                 \ 'true')
 
     call UltiTestStop()
@@ -196,20 +214,26 @@ endfunction
 " }}}
 " Test_In_Output {{{
 function! tests#test_the_tests#Test_In_Output()
-    call UltiTestStart()
+    call UltiTestStart(6)
 
-    call UltiAssertTrue(ulti_test_utility#In_Output(
-                \ "tests#test_the_tests#EchoHello", [], 'Hello'), 'true')
-    call UltiAssertTrue(ulti_test_utility#In_Output(
-                \ "tests#test_the_tests#EchoHello", [], 'Bye'), 'false')
-    call UltiAssertTrue(ulti_test_utility#In_Output(
-                \ "tests#test_the_tests#EchomHello", [], 'Hello'), 'true')
-    call UltiAssertTrue(ulti_test_utility#In_Output(
-                \ "tests#test_the_tests#EchomHello", [], 'Bye'), 'false')
-    call UltiAssertTrue(ulti_test_utility#In_Output(
-                \ "tests#test_the_tests#EchoBye", [], 'Bye'), 'true')
-    call UltiAssertTrue(ulti_test_utility#In_Output(
-                \ "tests#test_the_tests#EchoBye", [], 'Hello'), 'false')
+    call UltiAssertTrue("In_Output catches echo 'Hello'",
+                \ ulti_test_utility#In_Output("tests#test_the_tests#EchoHello",
+                \ [], 'Hello'), 'true')
+    call UltiAssertTrue("In_Output doesn't catch 'Bye' when echoing 'Hello'",
+                \ ulti_test_utility#In_Output("tests#test_the_tests#EchoHello",
+                \ [], 'Bye'), 'false')
+    call UltiAssertTrue("In_Output catches echom 'Hello'",
+                \ ulti_test_utility#In_Output("tests#test_the_tests#EchomHello",
+                \ [], 'Hello'), 'true')
+    call UltiAssertTrue("In_Output doesn't catch 'Bye' when echoming 'Hello'",
+                \ ulti_test_utility#In_Output("tests#test_the_tests#EchomHello",
+                \ [], 'Bye'), 'false')
+    call UltiAssertTrue("In_Output catches echo 'Bye'",
+                \ ulti_test_utility#In_Output("tests#test_the_tests#EchoBye",
+                \ [], 'Bye'), 'true')
+    call UltiAssertTrue("In_Output doesn't catch previous 'Hello'",
+                \ ulti_test_utility#In_Output("tests#test_the_tests#EchoBye",
+                \ [], 'Hello'), 'false')
 
     call UltiTestStop()
     call UltiTestReport()
@@ -217,12 +241,14 @@ endfunction
 " }}}
 " Test_In_Buffer {{{
 function! tests#test_the_tests#Test_In_Buffer()
-    call UltiTestStart()
+    call UltiTestStart(2)
 
-    call UltiAssertTrue(ulti_test_utility#In_Buffer('xxxxxxx'), 'false')
+    call UltiAssertTrue("In_Buffer('xxxxxxx') == 0 before writing it",
+                \ ulti_test_utility#In_Buffer('xxxxxxx'), 'false')
     " Adding Text and Testing Again
     normal ixxxxxxx
-    call UltiAssertTrue(ulti_test_utility#In_Buffer('xxxxxxx'), 'true')
+    call UltiAssertTrue("In_Buffer('xxxxxxx') == 1 after writing it",
+                \ ulti_test_utility#In_Buffer('xxxxxxx'), 'true')
     normal 7hd7l
 
     call UltiTestStop()
