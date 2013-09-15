@@ -99,7 +99,7 @@ function! tests#test_the_tests#Test_Is_Equals()
     " Lists
     call UltiAssertTrue("Is_Equals([], []) == 1",
                 \ ulti_test_utility#Is_Equals([], []), 'true')
-    call UltiAssertTrue("Is_Equals([""], []) == 0",
+    call UltiAssertTrue("Is_Equals([''], []) == 0",
                 \ ulti_test_utility#Is_Equals([""], []), 'false')
     call UltiAssertTrue("Is_Equals(['Test', ['Test']) == 1",
                 \ ulti_test_utility#Is_Equals(['Test'], ['Test']), 'true')
@@ -164,23 +164,31 @@ endfunction
 " }}}
 " Test_In_String {{{
 function! tests#test_the_tests#Test_In_String()
-    call UltiTestStart()
+    call UltiTestStart(8)
 
     " Simple
-    call UltiAssertTrue(ulti_test_utility#In_String('string', 'string'), 'true')
-    call UltiAssertTrue(ulti_test_utility#In_String('', 'string'), 'true')
-    call UltiAssertTrue(ulti_test_utility#In_String('string', 'big strings'), 'true')
-    call UltiAssertTrue(ulti_test_utility#In_String('strings', 'big string'), 'false')
-    call UltiAssertTrue(ulti_test_utility#In_String('String', 'big string'), 'false')
+    call UltiAssertTrue("In_String('string', 'string') == 1",
+                \ ulti_test_utility#In_String('string', 'string'), 'true')
+    call UltiAssertTrue("In_String('', 'string') == 1",
+                \ ulti_test_utility#In_String('', 'string'), 'true')
+    call UltiAssertTrue("In_String('string', 'big strings') == 1",
+                \ ulti_test_utility#In_String('string', 'big strings'), 'true')
+    call UltiAssertTrue("In_String('strings', 'big string') == 0",
+                \ ulti_test_utility#In_String('strings', 'big string'), 'false')
+    call UltiAssertTrue("In_String('String', 'big string') == 0",
+                \ ulti_test_utility#In_String('String', 'big string'), 'false')
 
     " Exceptions
-    call UltiAssertException('Improper Argument', "ulti_test_utility#In_String", [1, [1]],
+    call UltiAssertException("In_String(1, [1]) throws Improper Argument",
+                \ 'Improper Argument', "ulti_test_utility#In_String", [1, [1]],
                 \ 'true')
-    call UltiAssertException('Improper Argument', "ulti_test_utility#In_String", [1, 1],
+    call UltiAssertException("In_String(1, 1) throws Improper Argument",
+                \ 'Improper Argument', "ulti_test_utility#In_String", [1, 1],
                 \ 'true')
 
     " Regex
-    call UltiAssertTrue(ulti_test_utility#In_String('\v\d{4}', 'a12b1234'), 'true')
+    call UltiAssertTrue("In_String('\v\d{4}', 'a12b1234') == 1",
+                \ ulti_test_utility#In_String('\v\d{4}', 'a12b1234'), 'true')
 
     call UltiTestStop()
     call UltiTestReport()
