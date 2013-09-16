@@ -14,11 +14,6 @@ endif
 let did_ultimate_test_utility = 1
 " }}}
 
-" Global Mappings {{{
-nnoremap <silent> <leader><space>
-            \ :echo ulti_test_utility#Value_In_Dict('biskar', {'kevin': 'biskar'})<cr>
-" End Global Mappings }}}
-
 " Global Variables {{{
 if !exists('g:ulti_test_verbose')
     let g:ulti_test_verbose = 1
@@ -182,7 +177,7 @@ function! UltiAssertException(desc, error, fx, arguments, expectation, ...)
     let retval = 0
     let error = 0
     try
-        call call(Fx, a:arguments)
+        silent call call(Fx, a:arguments)
     catch
         if ulti_test_utility#In_String(a:error, v:exception)
             let retval = 1
