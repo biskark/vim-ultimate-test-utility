@@ -1,0 +1,47 @@
+*ulti_test_utility.txt*        Unit Testing Plugin for Vim
+
+Author:             Kevin Biskar
+License:            MIT, see LICENSE for more info
+Website:            https://github.com/biskark/vim-ultimate-test-utility
+Contact:            biskark@gmail.com
+Version:            0.0.0
+
+
+==============================================================================
+Ultimate_test_utility            *Ultimate-Test-Utility* 
+
+1. Introduction                         |Ultimate-Test-Utility-Intro|
+2. Features                             |Ultimate-Test-Utility-Features|
+3. Usage Examples                       |Ultimate-Test-Utility-Usage|
+4. Included Functions                   |Ultimate-Test-Utility-Functions|
+5. Configuration                        |Ultimate-Test-Utility-Config|
+
+==============================================================================
+1. Introduction                         *Ultimate-Test-Utility-Intro* 
+
+|Ultimate-Test-Utility| is the only tool you'll need for creating and running
+unit tests in Vim. Unit testing has been notoriously hard for Vim-script and
+the plugins that do exist often require languages, are difficult to
+setup/configure/use, have bugs, or have incomplete documentation.
+
+|Ultimate-Test-Utility| is maintained solely by Kevin Biskar and is constantly
+expanding it's features. If you have any feature requests, concerns, or have
+found any undocumented bugs, please notify him (me).
+
+==============================================================================
+2. Features                      *Ultimate-Test-Utility-Features* 
+
+|Ultimate-Test-Utility| is written solely in vimscript so compilation
+requirements are minimal.
+|Ultimate-Test-Utility| provides several levels of reporting so your reports
+are as detailed or minimal as you'd like.
+|Ultimate-Test-Utility| allows for easy installation through Pathogen, Vundle,
+or other compatible plugin managers.
+|Ultimate-Test-Utility| is flexible and supports inline testing or creating
+separate test functions. See |Ultimate-Test-Utility-Config| for more details.
+|Ultimate-Test-Utility| is, like most vim plugins, free! Feel free to
+distribute, contribute, modify or spread the word.
+
+
+==============================================================================
+/* vim: set ft=help: */
