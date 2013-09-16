@@ -43,10 +43,24 @@ function! ulti_test_utility#Is_Equals(first, second)
 endfunction
 " }}}
 " In_List() {{{
-" Returns 1 if item in collection of type list or dict, 0 if not, or -1 if
-" second argument isn't a list
+" Returns 1 if item in collection of type list or dict, 0 if not
 function! ulti_test_utility#In_List(item, list)
     return index(a:list, a:item) != -1 ? 1 : 0
+endfunction
+" }}}
+" In_File() {{{
+" Returns 1 if item in file specified by filename, 0 if not.
+" filename is 'string' path to file.
+" string is what you're looking for, can be regex.
+function! ulti_test_utility#In_File(filename, string)
+    let grepstring = "lvimgrep /" . a:string . "/j" . " " . a:filename
+    let retval = 1
+    try
+        execute grepstring
+    catch /E480/
+        let retval = 0
+    endtry
+    return retval
 endfunction
 " }}}
 " Key_In_Dict() {{{
