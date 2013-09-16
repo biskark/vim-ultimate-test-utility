@@ -100,6 +100,8 @@ found any undocumented bugs, please notify him (me).
   free to distribute, contribute, modify or spread the word.
 
 
+
+
 ==============================================================================
 3. Usage                              *Ultimate-Test-Utility-Usage*
 
@@ -120,6 +122,9 @@ projects.
 The third section, |Ultimate-Test-Utility-Basic-Examples|, explores more
 complex usage cases and explains the interface to some of the less intuitive
 functions.
+
+The more complex examples are available in examples.vim.
+
 
 ------------------------------------------------------------------------------
 3a. Quick Start Guide                 *Ultimate-Test-Utility-Quick-Start*
@@ -154,6 +159,7 @@ The basic workflow is simple.
 
 The next section shows how to setup and run one full "test" on an example
 function.
+
 
 ------------------------------------------------------------------------------
 3b. Basic Examples                    *Ultimate-Test-Utility-Basic-Examples*
@@ -223,12 +229,15 @@ are some similarities in usage.
    provide 'skip'), must be either 'true' or 'false', indicating if
    the Assertion is expected to be true or false.
 
-Essentially, each |UltiAssert...| looks like this... >
-    call UltiAssertWhatever(description, ..., expected_outcome)  " or
-    call UltiAssertWhatever(description, ..., expected_outcome, 'skip')
+Essentially, each simple |UltiAssert...| looks like this... >
+    call UltiAssertSimple(description, ..., expected_outcome)  " or
+    call UltiAssertSimple(description, ..., expected_outcome, 'skip')
 where the '...' is unique to whatever test you're using.
 
-Note that in MultiplyTestOne we used |UltiAssertTrue|, which took one unique
+Note: there is no test called |UltiAssertSimple| or |UltiAssert...|. These are
+place holder names.
+
+Notice that in MultiplyTestOne we used |UltiAssertTrue|, which took one unique
 argument (the result of the Multiply function call) and |UltiAssertEquals| which
 took two unique arguments (the results of two Multiply function calls). As you
 may have guessed, |UltiAssertTrue| simply evaluates the truthiness of its one
@@ -306,6 +315,7 @@ Two quick points, and we can move on to more advanced usage.
    the testing facility, it won't prevent any errors in the other arguments
    from causing problems.
 
+
 ------------------------------------------------------------------------------
 3c. Extended Examples                 *Ultimate-Test-Utility-Extended-Examples*
 
@@ -339,7 +349,7 @@ keymapping for this function. >
     endfunction
 
     function! NewMapping()
-        nnoremap <silent> <leader>S :call tests#test_the_tests#InsertHello()<cr>
+        nnoremap <silent> <leader>S :call InsertHello()<cr>
     endfunction
 
 
@@ -348,35 +358,55 @@ Ok, now let's write those tests. >
     function! TestDivide()
         call UltiTestStart("Divide Tests", 5)
         
-        " Simple tests
-        call UltiAssertTrue('6 / 2 == 3', Divide(6, 2) == 3, 'true')
-        call UltiAssertTrue("1 / 3 == 0 ('Testing Int Division')",
-                    \ Divide(1, 3) == 6, 'false')
+        " Output tests
+        call UltiAssertInOutput('6 / 2 == 3', 'Divide', [6, 2], '3', 'true')
+        call UltiAssertInOutput("1 / 3 == 0 ('Testing Int Division')",
+                    \ 'Divide', [1, 3], '6', 'false')
 
         " Exception tests
         call UltiAssertException("Throws divide by zero error",
                     \ 'Divide by zero', 'Divide', [4, 0], 'true')
         call UltiAssertException("Doesn't throw divide by zero error",
                     \ 'Divide by zero', 'Divide', [4, 2], 'false')
+        " For variety, use a variable for the function name
+        let l:fx = 'Divide'
         call UltiAssertException("Complains about arguments",
-                    \ 'xxxxxxx', 'Divide', [], 'true')
+                    \ 'Not enough arguments', l:fx, [], 'true')
 
         call UltiTestStop()
         call UltiTestReport()
     endfunction
 
 Notes:
-1. We still use the simple |UltiAssertTrue| for the simple edge cases.
-2. |UltiAssertException| follows the same pattern as the other |UltiAssert|
-   functions.
-3. However, |UltiAssertException| has some pecularities too. It has 3
-   mandatory arguments in addition to the regular ones.
-   1. The error you're checking for. It can be a vim style regex.
-   2. The name of the function you're testing AS A STRING. Do NOT call
-      this function directly.
-   3. Any arguments you want to pass to the function must be submitted as a
-      list. If no arguments are to be passed, you must still specify an empty
-      list. (See Sub-test 5). >
+|UltiAssertInOuput| and |UltiAssertException| both have more complicated
+interfaces but share similarities with the previous |UltiAssert| functions
+and with each other.
+
+1. Like the others, the first argument is a descriptive name, and the last
+   two arguments are the expection (either "true" or "false") and an
+   optional "skip" string to indicate the test is skipped.
+2. The second argument is a variable or raw string with the name of the
+   function to be tested. The name should NOT have parentheses or any
+   arguments.
+3. The third argument is a List of all arguments you would like to be
+   passed to the function you're testing. If no arguments are to be passed,
+   you must provide an empty list '[]'.
+4. The fourth argument is a string or regex specific to the |UltiAssert| test
+   you're using. For |UltiAsserException|, it should be the exception you
+   expect to be thrown. For |UltiAssertInOutput| it should be the string
+   you expect to be in the output.
+
+In summary, each simple |UltiAssert...| looks like this... >
+    call UltiAssertSimple(desc, ..., expected_outcome)  " or
+    call UltiAssertSimple(desc, ..., expected_outcome, 'skip')
+where the '...' is unique to whatever test you're using.
+
+Each complex |UltiAssert...| looks like this. >
+    call UltiAssertComplex(desc, fx, arguments, string, expected_outcome)  " or
+    call UltiAssertComplex(desc, fx, arguments, string, expected_outcome, 'skip')
+
+Note: there is no test called |UltiAssertSimple| or |UltiAssert...| or
+|UltiAssertComplex|. These are place holder names only.
 
 
 This next test is a bit of a cheat in that it tests the InsertHello() function
@@ -397,6 +427,7 @@ make sense to you, just know to be careful if you use it. >
         " Make the new mapping
         call NewMapping()
 
+        let l:fx = 'Hello'
         call UltiAssertInBuffer('Testing for "Hello" absence before execute',
                     \ 'Hello', 'false')
 
@@ -447,6 +478,11 @@ Now to call the whole thing... >
 
     call AllTests()
 
+Remember that because our TestInsertHello() tests for the presence and absence
+of the string 'Hello' in the buffer it's executed in, it's best to run these
+tests in an empty buffer. So it's probably best to source these functions,
+switch to a new buffer, and then call AllTests().
+
 You can change the output by setting one of these three values before you call
 the function. >
 
@@ -456,36 +492,309 @@ the function. >
 
 Assuming you left it at 1, you should get ... >
 
+    Sub-test 3: Failed, Testing 5 times -2 isn't -10
+    Test 1 Results:
+        Expected: 4, Passed: 3, Failed: 1, Skipped: 0
+
+    Test 2 'Divide Test' Results
+        Expected: 5, Passed: 5, Failed: 0, Skipped: 0
+
+    Test 3 'Testing Command Mapping and Text Insertion' Results
+        Expected: 3, Passed: 3, Failed: 0, Skipped: 0
+
+    1 test(s) failed.
+
+That's it for the tutorial, a list of available functions is in the TOC and
+detailed description of each one is available below.
 
 
 ==============================================================================
 4. Functions                          *Ultimate-Test-Utility-Functions*
+
+A comprehensive list of all the functions provided by |Ultimate-Test-Utility|.
+There are additional helper functions available in the autoload folder, but
+these are not intended to be used directly and do not have documentation here.
+However, these functions are tested and used heavily in this plugin so you may
+you use them if you wish.
+
 ------------------------------------------------------------------------------
-   a. Framework Functions
+4a. Framework Functions
+
+These are the functions that organize and display the results of
+|Ultimate-Test-Utility|. These are very simple and most don't require any
+arguments at all. If |g:ulti_test_mode| == 0, none of these function will do
+anything. Also, the level of reporting detail given by these functions is
+directly related to the setting of |g:ulti_test_verbose|.
+
+See |Ultimate-Test-Utility-Config| for more information.
+
 ------------------------------------------------------------------------------
-      1. UltiTestStart                *UltiTestStart*
+4a.1 UltiTestStart                    *UltiTestStart*
+
+    Usage: >
+
+      call UltiTestStart('message', num_expected_tests)
+      call UltiTestStart('message')
+      call UltiTestStart(num_expected_tests, 'message')
+      call UltiTestStart(num_expected_tests)
+      call UltiTestStart()
+
+This function readies |Ultimate-Test-Utility| for performing subtests. You may
+provide a descriptive message of what the test is for and an expected number
+of sub-tests you will perform. This test will complain if called in the middle
+of another set tests. See |UltiTestStop| below for more details.
+
 ------------------------------------------------------------------------------
-      2. UltiTestStop                 *UltiTestStop*
+4a.2 UltiTestStop                     *UltiTestStop*
+
+    Usage: >
+
+        call UltiTestStop()
+
+This function takes no arguments and tells |Ultimate-Test-Utility| that a full
+test is complete. It will tally up all the passed and failed sub-tests and
+ready this information for a call to |UltiTestFinalSummary|.
+
 ------------------------------------------------------------------------------
-      3. UltiTestReset                *UltiTestReset*
+4a.3 UltiTestReport                   *UltiTestReport*
+
+    Usage: >
+
+        call UltiTestReport()
+
+This function takes no arguments and outputs a report of the previously run
+test based on the value of |g:ulti_test_verbose|. This function will complain
+if it's run before closing a test. IE, you must call |UltiTestStop| before
+calling this.
+
 ------------------------------------------------------------------------------
-      4. UltiTestResetAll             *UltiTestResetAll*
+4a.4 UltiTestReset                    *UltiTestReset*
+
+    Usage: >
+
+        call UltiTestReset()
+
+This function takes no arguments and resets the subtest counter that
+|Ultimate-Test-Utility| uses behind the scene. This function is not strictly
+necessary, but handy when running several large tests at once. This function
+will complain if it's called before closing a test.
+
 ------------------------------------------------------------------------------
-      5. UltiTestFinalSummary         *UltiTestFinalSummary*
+4a.5 UltiTestResetAll                 *UltiTestResetAll*
+    Usage: >
+
+        call UltiTestResetAll()
+
+This function takes no arguments and resets the subtest and test counters that
+|Ultimate-Test-Utility| uses behind the scene. This function is not strictly
+necessary, but handy when running tests from multiple files at once in
+conjunction with |UltiTestFinalSummary|. This function will complain if it's
+called before closing a test.
+
 ------------------------------------------------------------------------------
-   b. Basic Assertion Functions
+4a.6 UltiTestFinalSummary             *UltiTestFinalSummary*
+    Usage: >
+
+        call UltiTestFinalSummary()
+
+This function takes no arguments and reports the a summary of all the
+previously run larger tests since the last call to |UltiTestResetAll|. For
+large plugins with multiple files it can be tedious to wade through individual
+sub-test results. A single coordinating test function that ends with a
+call to |UltiTestFinalSummary| (followed by an optional |UltiTestResetAll|)
+can be handy to users of your plugin to verify that all the features are
+working correctly, without getting bogged down in the details.
+
+    Example: >
+
+        function PluginTest()
+            call UltiTestStart()
+
+            .... " Individual UltiAssertTests
+            call UltiTestStop()
+            call UltiTestReset()
+        endfunction
+
+        function! TestMyPlugin()
+            let g:ulti_test_verbose = 0
+
+            call PluginTest1()
+            call PluginTest2()
+            call PluginTest3()
+            call PluginTest4()
+            call PluginTest5()
+            call UltiTestFinalSummary()
+        endfunction
+
+        :call TestMyPlugin
+
 ------------------------------------------------------------------------------
-      1. UltiAssertTrue               *UltiAssertTrue*
+4b. Basic Assertion Functions
+
+These are the basic building blocks of all good unit tests. While
+|UltiAsserTrue| is technically all you'll need, we've provided several
+conveniece functions to speed up the testing phase.
+
+All |UltiAssert| functions test using boolean values. 1 is 'true', 0 is
+'false'.
+
+All basic assertion functions have the same basic interface. >
+
+    call UltiAssert...(desc, ..., expectation, skip)
+
+desc == string description of the sub-test's purpose.
+
+... == one to several arguments specific to the sub-test being run.
+
+expectation == either the string 'true' or 'false' to indicate whether you
+    the Assertion to be true or false.
+
+skip == an optional argument that can be nothing, or the string 'skip' to
+    indicate you don't wish to evaluate that test currently.
+
 ------------------------------------------------------------------------------
-      2. UltiAssertEquals             *UltiAssertEquals*
+4b.1 UltiAssertTrue               *UltiAssertTrue*
+
+Function for testing a value for Vim's definition of truthiness. Note that all
+strings evaluate to 0 ("false") which is unlike other languages. For string
+"truthiness" |UltiAssertEmpty| is likely the better choice.
+
+    Usage: >
+
+        call UltiAssertTrue(desc, value, expectation, skip)
+
+desc == string description of the sub-test's purpose.
+
+value == the value being tested for truthiness, based on Vim's defintion. It's
+    common for some people to put a function call directly in the value slot.
+
+expectation == either the string 'true' or 'false' to indicate whether you
+    the Assertion to be true or false.
+
+skip == an optional argument that can be nothing, or the string 'skip' to
+    indicate you don't wish to evaluate that test currently.
+
+    Examples: >
+
+        call UltiAssertTrue('1 is true', 1, 'true')
+        call UltiAssertTrue('0 isn't true', 1, 'false')
+        call UltiAssertTrue('0 is false', 0, 'true')
+
 ------------------------------------------------------------------------------
-      3. UltiAssertEmpty              *UltiAssertEmpty*
+4b.2 UltiAssertEquals             *UltiAssertEquals*
+
+Function for testing a two items for Vim's definition of equivalence. For
+string comparisons, uses a case-sensitive definition regardless of what your
+vim settings are.
+
+    Usage: >
+
+        call UltiAssertEquals(desc, first, second, expectation, skip)
+
+
+desc == string description of the sub-test's purpose.
+
+first, second == the two values being compared to each other.
+
+expectation == either the string 'true' or 'false' to indicate whether you
+    the Assertion to be true or false.
+
+skip == an optional argument that can be nothing, or the string 'skip' to
+    indicate you don't wish to evaluate that test currently.
+
+    Examples: >
+
+        call UltiAssertTrue('4 divided by 2 is 2', 4 / 2, 2, 'true')
+        call UltiAssertTrue('12 divided by 3 isn't 2', 12 / 3, 2, 'false')
+
 ------------------------------------------------------------------------------
-      4. UltiAssertInString           *UltiAssertInString*
+4b.3 UltiAssertEmpty              *UltiAssertEmpty*
+
+Function for testing an item for Vim's definition of empty. While handy with
+lists and dicts, this is also what you likely want to use when testing
+strings for the "truthiness" definition used in other languages.
+
+    Usage: >
+
+        call UltiAssertEmpty(desc, item, expectation, skip)
+
+
+desc == string description of the sub-test's purpose.
+
+item == an item you want Vim to evaluate as empty or not. 
+
+expectation == either the string 'true' or 'false' to indicate whether you
+    the Assertion to be true or false.
+
+skip == an optional argument that can be nothing, or the string 'skip' to
+    indicate you don't wish to evaluate that test currently.
+
+    Examples: >
+
+        call UltiAssertTrue('4 divided by 2 is 2', 4 / 2, 2, 'true')
+        call UltiAssertTrue('12 divided by 3 isn't 2', 12 / 3, 2, 'false')
+
 ------------------------------------------------------------------------------
-      5. UltiAssertInBuffer           *UltiAssertInBuffer*
+4b.4 UltiAssertInString           *UltiAssertInString*
+
+Function for testing the presence of a substring or regex in a given string.
+This only tests strings or variables that hold strings. See
+|UltiAssertInOutput|, |UltiAssertInBuffer|, and |UltiAssertInFile| for use in
+different situations.
+
+    Usage: >
+
+        call UltiAssertInString(desc, pattern, string, expectation, skip)
+
+
+desc == string description of the sub-test's purpose.
+
+pattern == a substring or vim regex you wish to search for.
+
+string == the string to look in.
+
+expectation == either the string 'true' or 'false' to indicate whether you
+    the Assertion to be true or false.
+
+skip == an optional argument that can be nothing, or the string 'skip' to
+    indicate you don't wish to evaluate that test currently.
+
+    Examples: >
+
+        call UltiAssertInString('st in string', 'st', 'string', 'true')
+        call UltiAssertInString('ell in hello', '\vel{2}o$', 'hello', 'true')
+
 ------------------------------------------------------------------------------
-   c. Advanced Assertion Functions
+4b.5 UltiAssertInBuffer           *UltiAssertInBuffer*
+
+Function for testing the presence of a substring or regex in the current
+buffer. Make sure that the buffer this is run contains the text you think it
+does.
+See |UltiAssertInOutput|, |UltiAssertInString|, and |UltiAssertInFile| for use in
+different situations.
+
+    Usage: >
+
+        call UltiAssertInBuffer(desc, pattern, expectation, skip)
+
+
+desc == string description of the sub-test's purpose.
+
+pattern == a substring or vim regex you wish to search for.
+
+expectation == either the string 'true' or 'false' to indicate whether you
+    the Assertion to be true or false.
+
+skip == an optional argument that can be nothing, or the string 'skip' to.
+    indicate you don't wish to evaluate that test currently.
+
+    Examples: >
+
+        call UltiAssertInBuffer('This buffer doesn't have 4 x's in a row',
+                    \ '\vx{4}', 'false')
+
+------------------------------------------------------------------------------
+4c. Advanced Assertion Functions
 ------------------------------------------------------------------------------
       1. UltiAssertInFile             *UltiAssertInFile*
 ------------------------------------------------------------------------------

@@ -97,11 +97,10 @@ endfunction
 " output or 0 otherwise. Throws exceptions if incorrect parameters passed in.
 function! ulti_test_utility#In_Output(fx, arguments, string)
     let retval = 0
-    let Fx = function(a:fx)
 
     " Creates a variable, output, and redir's output into it
     redir => output
-    silent call call(Fx, a:arguments)
+    silent call call(a:fx, a:arguments, {})
     redir END
     if ulti_test_utility#In_String(a:string, output)
         let retval = 1

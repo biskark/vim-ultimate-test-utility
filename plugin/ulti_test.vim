@@ -168,30 +168,19 @@ endfunction
 " arguments is a list of any arguments to be supplied to the fx.
 " Can optionally add the string 'skip' to the end of the parameter list to
 " indicate that this test should be skipped.
-function! UltiAssertException(desc, error, fx, arguments, expectation, ...)
+function! UltiAssertException(desc, fx, arguments, error, expectation, ...)
     if g:ulti_test_mode == 0
         return
     endif
     let skip = a:0 > 0 ? a:1 : ""
-    let Fx = function(a:fx)
     let retval = 0
     let error = 0
-    try
-        silent call call(Fx, a:arguments)
-    catch
-        if ulti_test_utility#In_String(a:error, v:exception)
-            let retval = 1
-        else
-            error = 1
-            if g:ulti_test_rethrow
-                throw v:exception
-            endif
-        endif
-    endtry
+    execute "try"
+            \."\n    silent call call(a:fx, a:arguments, {})"
+            \."\ncatch /".a:error."/"
+            \."\n    let retval = 1"
+            \."\nendtry"
     call s:Test_Retval(retval, a:expectation, a:desc, skip)
-    if error
-        echom "    Unexpected Exception thrown: " . v:exception
-    endif
 endfunction
 " }}}
 " End Assertion Functions }}}

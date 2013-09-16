@@ -17,6 +17,7 @@ let did_auto_test_the_tests = 1
 function! tests#test_the_tests#Test_Is_True()
     call UltiTestStart("ulti_test_utility#Is_True()", 7)
 
+    let l:fx = 'ulti_test_utility#Is_True'
     call UltiAssertEquals("Is_True(1) == 1",
                 \ ulti_test_utility#Is_True(1), 1, 'true')
     call UltiAssertEquals("Is_True(0) == 0",
@@ -25,17 +26,13 @@ function! tests#test_the_tests#Test_Is_True()
                 \ ulti_test_utility#Is_True('string'), 0, 'true')
 
     call UltiAssertException("Is_True(2.0) throws exception",
-                \ "Improper Argument", 'ulti_test_utility#Is_True',
-                \ [2.0], 'true')
+                \ l:fx, [2.0], "Improper Argument", 'true')
     call UltiAssertException("Is_True() throws exception",
-                \ "Not enough arguments", 'ulti_test_utility#Is_True',
-                \ [], 'true')
+                \ l:fx, [], "Not enough arguments", 'true')
     call UltiAssertException("Is_True(1) doesn't throw exception",
-                \ "", 'ulti_test_utility#Is_True',
-                \ [1], 'false')
+                \ l:fx, [1], "", 'false')
     call UltiAssertException("Is_True({}) throws exception",
-                \ "Improper Argument", 'ulti_test_utility#Is_True',
-                \ [{}], 'true')
+                \ l:fx, [{}], "Improper Argument", 'true')
 
     call UltiTestStop()
     call UltiTestReport()
@@ -62,13 +59,12 @@ function! tests#test_the_tests#Test_Is_Empty()
                 \ ulti_test_utility#Is_Empty({}), 'true')
     call UltiAssertTrue("Is_Empty({'Test': 'Case'}) == 0",
                 \ ulti_test_utility#Is_Empty({'Test': 'Case'}), 'false')
-    " Other
+    " Exceptions
+    let l:fx = 'ulti_test_utility#Is_Empty'
     call UltiAssertException("Is_Empty(0) throws exception",
-                \ 'Improper Argument', 'ulti_test_utility#Is_Empty',
-                \ [0], 'true')
+                \ l:fx, [0], 'Improper Argument', 'true')
     call UltiAssertException("Is_Empty() throws exception",
-                \ 'Not enough arguments', 'ulti_test_utility#Is_Empty',
-                \ [], 'true')
+                \ l:fx, [], 'Not enough arguments', 'true')
 
     call UltiTestStop()
     call UltiTestReport()
@@ -166,15 +162,13 @@ function! tests#test_the_tests#Test_In_List()
                 \ [{'test': 'case'}, 'string']), 'false')
 
     " Exceptions
+    let l:fx = 'ulti_test_utility#In_List'
     call UltiAssertException("In_List([1, [1]]) doesn't throw error",
-                \ 'List required', "ulti_test_utility#In_List", [1, [1]],
-                \ 'false')
+                \ l:fx, [1, [1]], 'List required', 'false')
     call UltiAssertException("In_List([1, 1]) throws error", 
-                \ 'List required', "ulti_test_utility#In_List", [1, 1],
-                \ 'true')
+                \ l:fx, [1, 1], 'List required', 'true')
     call UltiAssertException("In_List([1]) throws 'Note enough arguments'",
-                \ 'Not enough arguments', "ulti_test_utility#In_List", [1],
-                \ 'true')
+                \ l:fx, [1],'Not enough arguments', 'true')
 
     call UltiTestStop()
     call UltiTestReport()
@@ -197,12 +191,11 @@ function! tests#test_the_tests#Test_In_String()
                 \ ulti_test_utility#In_String('String', 'big string'), 'false')
 
     " Exceptions
+    let l:fx = 'ulti_test_utility#In_String'
     call UltiAssertException("In_String(1, [1]) throws Improper Argument",
-                \ 'Improper Argument', "ulti_test_utility#In_String", [1, [1]],
-                \ 'true')
+                \ l:fx, [1, [1]], 'Improper Argument', 'true')
     call UltiAssertException("In_String(1, 1) throws Improper Argument",
-                \ 'Improper Argument', "ulti_test_utility#In_String", [1, 1],
-                \ 'true')
+                \ l:fx, [1, 1], 'Improper Argument', 'true')
 
     " Regex
     call UltiAssertTrue("In_String('\v\d{4}', 'a12b1234') == 1",
@@ -321,8 +314,8 @@ function! tests#test_the_tests#Test_Key_In_Dict()
                 \ ulti_test_utility#Key_In_Dict('1',
                 \ {1: ''}), 'true')
     call UltiAssertException("Key_In_Dict([1, 2], [2]) throws error",
-                \ 'Dictionary required', 'ulti_test_utility#Key_In_Dict',
-                \ [[1,2], [2]], 'true')
+                \ 'ulti_test_utility#Key_In_Dict',
+                \ [[1,2], [2]], 'Dictionary required', 'true')
 
     call UltiTestStop()
     call UltiTestReport()
@@ -351,8 +344,8 @@ function! tests#test_the_tests#Test_Value_In_Dict()
                 \ ulti_test_utility#Value_In_Dict('1',
                 \ {'key': 1}), 'false')
     call UltiAssertException("Value_In_Dict([1,2], [2]) throws error.",
-                \ "Dictionary required", 'ulti_test_utility#Value_In_Dict',
-                \ [[1,2], [2]], 'true')
+                \ 'ulti_test_utility#Value_In_Dict', [[1,2], [2]],
+                \ "Dictionary required", 'true')
 
     call UltiTestStop()
     call UltiTestReport()
@@ -481,26 +474,20 @@ endfunction
 function! tests#test_the_tests#ExampleTwo()
     call UltiTestStart('Checking for appropriate output of EchoBye()', 5)
 
+    let l:echobye = 'tests#test_the_tests#EchoBye'
     call UltiAssertInOutput("Doesn't output hello",
-                \ 'tests#test_the_tests#EchoBye', [], 'Hello',
-                \ 'false')
+                \ l:echobye, [], 'Hello', 'false')
     call UltiAssertInOutput("Does output Bye",
-                \ 'tests#test_the_tests#EchoBye', [], 'Bye',
-                \ 'true')
+                \ l:echobye, [], 'Bye', 'true')
     call UltiAssertInOutput("Does output 'stranger' if no arguments",
-                \ 'tests#test_the_tests#EchoBye', [], 'stranger',
-                \ 'true')
+                \ l:echobye, [], 'stranger', 'true')
     call UltiAssertInOutput("Doesn't output 'stranger' if 1 argument",
-                \ 'tests#test_the_tests#EchoBye', ['Kevin'], 'stranger',
-                \ 'false')
+                \ l:echobye, ['Kevin'], 'stranger', 'false')
     call UltiAssertInOutput("Does output 'Kevin' if 'Kevin' in arguments",
-                \ 'tests#test_the_tests#EchoBye', ['Kevin'], 'Kevin',
-                \ 'true')
+                \ l:echobye, ['Kevin'], 'Kevin', 'true')
     call UltiAssertInOutput("Echoes your favorite food without even asking",
-                \ 'tests#test_the_tests#EchoBye', ['Kevin'],
-                \ 'Bye Kevin, your favorite food is cereal',
-                \ 'true',
-                \ 'skip')
+                \ l:echobye, ['Kevin'],
+                \ 'Bye Kevin, your favorite food is cereal', 'true', 'skip')
 
     call UltiTestStop()
     call UltiTestReport()
