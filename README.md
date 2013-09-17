@@ -45,8 +45,8 @@ Features and Requirements
 
 Installation
 ------------
-Installation is quite simple does not require any other plugins or languages
-to be installed.
+Installation is quite simple and does not require any other plugins or
+languages to be installed.
 
 ### Pathogen
 
