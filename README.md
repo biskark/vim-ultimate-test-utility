@@ -100,21 +100,29 @@ The basic workflow is simple.
 
 1. You MUST call UltiTestStart to tell vim that you are going into
    "test-mode".
+
 2. You then call as many UltiAssert... sub-tests as you need.
+
 3. You then call UltiTestStop to tell vim that a particular test is over.
+
 4. You may then call UltiTestReport which will give a report of varying
    detail about the success and failure of your sub-tests. Additionally, this
    will report the overall success of the entire test. The degree of detail
    reported is dependent on the value of g:ulti\_test\_verbose. See
    Ultimate-Test-Utility-Config for more details.
+
 5. If you wish to execute more tests (ie. more groupds of sub-tests), you
    should call UltiTestReset.
+
 6. Repeat steps 1-6 as needed.
+
 7. You may then call UltiTestFinalSummary to give a simple summary of all
    the "tests" you have run (since you either loaded the plugin or called
    UltiTestResetAll, see next step for details).
+
 8. If you wish to run another suite of "tests", say for a different plugin or
    file, call UltiTestResetAll.
+
 9. Repeat steps 1-8 as needed.
 
 The next section shows how to setup and run one full "test" on an example
@@ -187,10 +195,13 @@ are some similarities in usage.
    this message was displayed when sub-test 3 failed. Descriptive messages
    make pin-pointing problems quick, but you may provide an empty string like
    we did for the first sub-test.
+
 2. Next are the arguments unique to the assertion test being run.
+
 3. The last argument is optional, and can only be the string 'skip' to
    indicate that you don't want to run the test at this time. Notice that we
    did not use this feature in any of the tests we just ran.
+
 4. The argument before 'skip' (aka the last argument if you don't
    provide 'skip'), must be either 'true' or 'false', indicating if
    the Assertion is expected to be true or false.
@@ -437,12 +448,15 @@ endfunction
 Notes
 1. We specified there should be 3 sub-tests run and given the test a
    description.
+
 2. We have not called UltiTestReset yet.
+
 3. Now that we're executing more complicated functions, we need
    to be careful that we're not polluting the current buffer with side-effects
    from our testing. In particular beware of testing UltiAssertInBuffer
    sub-tests in the buffer where you wrote the test. See if you can figure out
    why.
+
 4. UltiAssertInBuffer has an almost identical interface to UltiAssertTrue.
 
 
