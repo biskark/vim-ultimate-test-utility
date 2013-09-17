@@ -18,12 +18,6 @@ let did_ultimate_test_utility = 1
 if !exists('g:ulti_test_verbose')
     let g:ulti_test_verbose = 1
 endif
-if !exists('g:ulti_test_rethrow')
-    let g:ulti_test_rethrow = 0
-endif
-if !exists('g:ulti_test_mode')
-    let g:ulti_test_mode = 1
-endif
 " }}}
 
 " Script Variables {{{
@@ -54,9 +48,6 @@ let s:test_name = ''
 " Can optionally add the string 'skip' to the end of the parameter list to
 " indicate that this test should be skipped.
 function! UltiAssertInString(desc, sub, string, expectation, ...)
-    if g:ulti_test_mode == 0
-        return
-    endif
     let skip = a:0 > 0 ? a:1 : ""
     call s:Test_Retval(ulti_test_utility#In_String(a:sub, a:string),
                 \ a:expectation, a:desc, skip)
@@ -73,9 +64,6 @@ endfunction
 " Can optionally add the string 'skip' to the end of the parameter list to
 " indicate that this test should be skipped.
 function! UltiAssertInOutput(desc, fx, arguments, string, expectation, ...)
-    if g:ulti_test_mode == 0
-        return
-    endif
     let skip = a:0 > 0 ? a:1 : ""
     call s:Test_Retval(ulti_test_utility#In_Output(a:fx, a:arguments, a:string),
                 \ a:expectation, a:desc, skip)
@@ -90,26 +78,24 @@ endfunction
 " Can optionally add the string 'skip' to the end of the parameter list to
 " indicate that this test should be skipped.
 function! UltiAssertInBuffer(desc, string, expectation, ...)
-    if g:ulti_test_mode == 0
-        return
-    endif
     let skip = a:0 > 0 ? a:1 : ""
     call s:Test_Retval(ulti_test_utility#In_Buffer(a:string),
                 \ a:expectation, a:desc, skip)
 endfunction
 " }}}
 " UltiAssertInFile {{{
-" A simple assertion of a substring match in the CURRENT BUFFER.
+" A simple assertion of a substring match in the given file.
 " desc is a user message that describes the test being run.
+" filename is the path to the file to look in
 " string is the string being searched for, can be regex.
 " expectation is either 'true' or 'false' to indicate whether sub should be
 " found.
 " Can optionally add the string 'skip' to the end of the parameter list to
 " indicate that this test should be skipped.
+" UltiAssert tries to account for a few common IO errors, but you may get
+" unexpected behavior if you try to access a file that doesn't exist or you
+" don't have permissions for.
 function! UltiAssertInFile(desc, filename, string, expectation, ...)
-    if g:ulti_test_mode == 0
-        return
-    endif
     let skip = a:0 > 0 ? a:1 : ""
     call s:Test_Retval(ulti_test_utility#In_File(a:filename, a:string),
                 \ a:expectation, a:desc, skip)
@@ -122,9 +108,6 @@ endfunction
 " Can optionally add the string 'skip' to the end of the parameter list to
 " indicate that this test should be skipped.
 function! UltiAssertTrue(desc, item, expectation, ...)
-    if g:ulti_test_mode == 0
-        return
-    endif
     let skip = a:0 > 0 ? a:1 : ""
     call s:Test_Retval(ulti_test_utility#Is_True(a:item),
                 \ a:expectation, a:desc, skip)
@@ -137,9 +120,6 @@ endfunction
 " Can optionally add the string 'skip' to the end of the parameter list to
 " indicate that this test should be skipped.
 function! UltiAssertEquals(desc, first, second, expectation, ...)
-    if g:ulti_test_mode == 0
-        return
-    endif
     let skip = a:0 > 0 ? a:1 : ""
     call s:Test_Retval(ulti_test_utility#Is_Equals(a:first, a:second),
                 \ a:expectation, a:desc, skip)
@@ -152,9 +132,6 @@ endfunction
 " Can optionally add the string 'skip' to the end of the parameter list to
 " indicate that this test should be skipped.
 function! UltiAssertEmpty(desc, item, expectation, ...)
-    if g:ulti_test_mode == 0
-        return
-    endif
     let skip = a:0 > 0 ? a:1 : ""
     call s:Test_Retval(ulti_test_utility#Is_Empty(a:item),
                 \ a:expectation, a:desc, skip)
@@ -169,9 +146,6 @@ endfunction
 " Can optionally add the string 'skip' to the end of the parameter list to
 " indicate that this test should be skipped.
 function! UltiAssertException(desc, fx, arguments, error, expectation, ...)
-    if g:ulti_test_mode == 0
-        return
-    endif
     let skip = a:0 > 0 ? a:1 : ""
     let retval = 0
     let error = 0
@@ -193,9 +167,6 @@ endfunction
 " name of the function being tested.
 " The arguments can be in any order.
 function! UltiTestStart(...)
-    if g:ulti_test_mode == 0
-        return
-    endif
     if s:test_is_running
         throw "Cannot start UltiTest in the middle of another test."
     endif
@@ -243,9 +214,6 @@ endfunction
 " UltiTestStop {{{
 " Function that locks up the testing suite
 function! UltiTestStop()
-    if g:ulti_test_mode == 0
-        return
-    endif
     if g:ulti_test_verbose == 2
         echom "Test " . s:test_counter . " Stopped"
     endif
@@ -260,9 +228,6 @@ endfunction
 " UltiTestReset {{{
 " Function that resets variables
 function! UltiTestReset()
-    if g:ulti_test_mode == 0
-        return
-    endif
     if s:test_is_running
         throw "UltiTest: Cannot be reset while running a test."
     endif
@@ -272,9 +237,6 @@ endfunction
 " UltiTestResetAll {{{
 " Function that resets variables
 function! UltiTestResetAll()
-    if g:ulti_test_mode == 0
-        return
-    endif
     call UltiTestReset()
     let s:number_tests_failed = 0
     let s:number_tests_passed = 0
@@ -284,9 +246,6 @@ endfunction
 " Function that echom's a report of all the most recently run tests
 " Does not output anything except errors if g:ulti_test_verbose == 0
 function! UltiTestReport()
-    if g:ulti_test_mode == 0
-        return
-    endif
     let message = ''
     if s:test_is_running
         throw "UltiTestReport: Cannot report while tests are running."
@@ -338,9 +297,6 @@ endfunction
 " UltiTestFinalSummary {{{
 " Function that echom's a report of all the most recently run tests
 function! UltiTestFinalSummary()
-    if g:ulti_test_mode == 0
-        return
-    endif
     if s:test_is_running
         throw "Cannot report summary if test is running."
     endif
@@ -350,6 +306,7 @@ function! UltiTestFinalSummary()
         echom s:number_tests_failed . " test(s) failed."
     else
         echom "No Tests Run"
+        echom " "
     endif
 endfunction
 " }}}

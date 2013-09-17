@@ -36,21 +36,17 @@ Ultimate_test_utility            *Ultimate-Test-Utility*
       3. UltiAssertEmpty              |UltiAssertEmpty|
       4. UltiAssertInString           |UltiAssertInString|
       5. UltiAssertInBuffer           |UltiAssertInBuffer|
+      6. UltiAssertInFile             |UltiAssertInFile|
 
    c. Advanced Assertion Functions
-      1. UltiAssertInFile             |UltiAssertInFile|
-      2. UltiAssertInOutput           |UltiAssertInOutput|
-      3. UltiAssertException          |UltiAssertException|
+      1. UltiAssertInOutput           |UltiAssertInOutput|
+      2. UltiAssertException          |UltiAssertException|
 
    d. Example Functions
       1. UltiTestSelfUnit             |UltiTestSelfUnit|
       2. UltiTestExampleUnit          |UltiTestExampleUnit|
 
 5. Configuration                      |Ultimate-Test-Utility-Config|
-
-   a. g:ulti_test_verbose             |ulti_test_verbose|
-   b. g:ulti_test_rethrow             |ulti_test_rethrow|
-   c. g:ulti_test_mode                |ulti_test_mode|
 
 ==============================================================================
 1. Introduction                      *Ultimate-Test-Utility-Intro* 
@@ -89,12 +85,6 @@ found any undocumented bugs, please notify him (me).
 - |Ultimate-Test-Utility| allows for easy installation through Pathogen, Vundle,
   or other compatible plugin managers. If you're reading this, it's likely
   installed correctly already, but if not consult the README.md file.
-
-- |Ultimate-Test-Utility| is flexible and supports both inline testing or
-  creating separate test functions. Both techniques can be customized easily
-  for development and distribution versions with minimal hassle. See
-  |Ultimate-Test-Utility-Config| and |Ultimate-Test-Utility-Extended-Examples| 
-  for more details.
 
 - |Ultimate-Test-Utility| is, like most vim plugins, open-source! Please feel
   free to distribute, contribute, modify or spread the word.
@@ -159,7 +149,6 @@ The basic workflow is simple.
 
 The next section shows how to setup and run one full "test" on an example
 function.
-
 
 ------------------------------------------------------------------------------
 3b. Basic Examples                    *Ultimate-Test-Utility-Basic-Examples*
@@ -522,8 +511,7 @@ you use them if you wish.
 
 These are the functions that organize and display the results of
 |Ultimate-Test-Utility|. These are very simple and most don't require any
-arguments at all. If |g:ulti_test_mode| == 0, none of these function will do
-anything. Also, the level of reporting detail given by these functions is
+arguments at all. Also, the level of reporting detail given by these functions is
 directly related to the setting of |g:ulti_test_verbose|.
 
 See |Ultimate-Test-Utility-Config| for more information.
@@ -636,7 +624,7 @@ These are the basic building blocks of all good unit tests. While
 conveniece functions to speed up the testing phase.
 
 All |UltiAssert| functions test using boolean values. 1 is 'true', 0 is
-'false'.
+'false' but they don't explicitly return anything.
 
 All basic assertion functions have the same basic interface. >
 
@@ -692,14 +680,14 @@ vim settings are.
         call UltiAssertEquals(desc, first, second, expectation, skip)
 
 
-desc == string description of the sub-test's purpose.
+'desc' == string description of the sub-test's purpose.
 
-first, second == the two values being compared to each other.
+'first', second == the two values being compared to each other.
 
-expectation == either the string 'true' or 'false' to indicate whether you
+'expectation' == either the string 'true' or 'false' to indicate whether you
     the Assertion to be true or false.
 
-skip == an optional argument that can be nothing, or the string 'skip' to
+'skip' == an optional argument that can be nothing, or the string 'skip' to
     indicate you don't wish to evaluate that test currently.
 
     Examples: >
@@ -719,14 +707,14 @@ strings for the "truthiness" definition used in other languages.
         call UltiAssertEmpty(desc, item, expectation, skip)
 
 
-desc == string description of the sub-test's purpose.
+'desc' == string description of the sub-test's purpose.
 
-item == an item you want Vim to evaluate as empty or not. 
+'item' == an item you want Vim to evaluate as empty or not. 
 
-expectation == either the string 'true' or 'false' to indicate whether you
+'expectation' == either the string 'true' or 'false' to indicate whether you
     the Assertion to be true or false.
 
-skip == an optional argument that can be nothing, or the string 'skip' to
+'skip' == an optional argument that can be nothing, or the string 'skip' to
     indicate you don't wish to evaluate that test currently.
 
     Examples: >
@@ -747,16 +735,16 @@ different situations.
         call UltiAssertInString(desc, pattern, string, expectation, skip)
 
 
-desc == string description of the sub-test's purpose.
+'desc' == string description of the sub-test's purpose.
 
-pattern == a substring or vim regex you wish to search for.
+'pattern' == a substring or vim regex you wish to search for.
 
-string == the string to look in.
+'string' == the string to look in.
 
-expectation == either the string 'true' or 'false' to indicate whether you
+'expectation' == either the string 'true' or 'false' to indicate whether you
     the Assertion to be true or false.
 
-skip == an optional argument that can be nothing, or the string 'skip' to
+'skip' == an optional argument that can be nothing, or the string 'skip' to
     indicate you don't wish to evaluate that test currently.
 
     Examples: >
@@ -778,14 +766,14 @@ different situations.
         call UltiAssertInBuffer(desc, pattern, expectation, skip)
 
 
-desc == string description of the sub-test's purpose.
+'desc' == string description of the sub-test's purpose.
 
-pattern == a substring or vim regex you wish to search for.
+'pattern' == a substring or vim regex you wish to search for.
 
-expectation == either the string 'true' or 'false' to indicate whether you
+'expectation' == either the string 'true' or 'false' to indicate whether you
     the Assertion to be true or false.
 
-skip == an optional argument that can be nothing, or the string 'skip' to.
+'skip' == an optional argument that can be nothing, or the string 'skip' to.
     indicate you don't wish to evaluate that test currently.
 
     Examples: >
@@ -794,30 +782,243 @@ skip == an optional argument that can be nothing, or the string 'skip' to.
                     \ '\vx{4}', 'false')
 
 ------------------------------------------------------------------------------
+4b.6 UltiAssertInFile            *UltiAssertInFile*
+
+Function for testing the presence of a substring or regex in the given file.
+Make sure that the file exists and you have permission to access it as
+|Ultimate-Test-Utility|'s may be undefined if it encounters unforeseen IO
+problems.
+See |UltiAssertInOutput|, |UltiAssertInString|, and |UltiAssertInBuffer| for use in
+different situations.
+
+    Usage: >
+
+        call UltiAssertInFile(desc, filename, pattern, expectation, skip)
+
+
+'desc' == string description of the sub-test's purpose.
+
+'filename' == the path to the file you wish to search through.
+
+'pattern' == a substring or vim regex you wish to search for.
+
+'expectation' == either the string 'true' or 'false' to indicate whether you
+    the Assertion to be true or false.
+
+'skip' == an optional argument that can be nothing, or the string 'skip' to.
+    indicate you don't wish to evaluate that test currently.
+
+    Examples: >
+
+        call UltiAssertInBuffer('Make sure README.md has my name in it',
+                    \ 'README.md', 'Kevin Biskar', 'true')
+
+------------------------------------------------------------------------------
 4c. Advanced Assertion Functions
+
+These functions are also used to execute sub-tests and though they share the
+basics with the functions above, they are slightly more complex to use. These
+Assertion Tests examine the actual execution of a given function and thus the
+Test signature is a little more complex. But, since they share the same basic
+structure with eachother, learning them all is not so hard.
+
+Remember, all |UltiAssert| functions test using boolean values. 1 is 'true',
+0 is 'false' but they don't explicitly return anything.
+
+|UltiAssertInOutput| and |UltiAssertException| have the same basic interface. >
+
+    call UltiAssert...(desc, fx, argument_list, string, expectation, skip)
+
+desc == string description of the sub-test's purpose.
+
+... == one to several arguments specific to the sub-test being run.
+
+fx == the name of a function you want to run.
+
+argument_list == an explicit List of arguments to pass to the fx when it's
+    called. If no arguments are needed, you must still provide an empty list.
+
+string == a string or regex whose function depends on which sub-test you're
+    using.
+
+expectation == either the string 'true' or 'false' to indicate whether you
+    the Assertion to be true or false.
+
+skip == an optional argument that can be nothing, or the string 'skip' to
+    indicate you don't wish to evaluate that test currently.
+
 ------------------------------------------------------------------------------
-      1. UltiAssertInFile             *UltiAssertInFile*
+4c.1 UltiAssertInOutput           *UltiAssertInOutput*
+
+Function for testing the presence of a substring or regex in the output of a
+function. If you have a key mapping that echos something, you should wrap a
+call to it in a function, and test that the function executes the command you
+want, and that the command does what you want it to.
+
+See |UltiAssertInFile|, |UltiAssertInString|, and |UltiAssertInBuffer| for use in
+different situations.
+
+    Usage: >
+
+        call UltiAssertInOutput(desc, fx, arguments, pattern, expectation, skip)
+
+
+'desc' == string description of the sub-test's purpose.
+
+'filename' == the path to the file you wish to search through.
+
+'fx' == the string name of the function whose output you are examining. Do not
+    include the parentheses.
+
+'arguments' == an explicit list of the arguments you wish to pass to fx. If no
+    arguments are needed, you must still supply an empty list.
+
+'pattern' == a substring or vim regex you wish to search for in the output.
+
+'expectation' == either the string 'true' or 'false' to indicate whether you
+    the Assertion to be true or false.
+
+'skip' == an optional argument that can be nothing, or the string 'skip' to.
+    indicate you don't wish to evaluate that test currently.
+
+    Examples: >
+
+        " Assume HelloPerson() is a function that accepts zero, one or two
+        " arguments and echos 'Hello [names]'
+        call UltiAssertInOutput('Test for my name in HelloPerson',
+                    \ 'HelloPerson', ['Kevin Biskar'], 'Hello, Kevin Biskar', 'true')
+        call UltiAssertInOutput('Test that my name isn't in HelloPerson',
+                    \ 'HelloPerson', [], 'Hello, Kevin Biskar', 'false')
+        call UltiAssertInOutput('Test for two names in HelloPerson',
+                    \ 'HelloPerson', ['Kevin', 'Jeff'],
+                    \ 'Hello, Kevin and Jeff', 'true')
+
 ------------------------------------------------------------------------------
-      2. UltiAssertInOutput           *UltiAssertInOutput*
+4c.2 UltiAssertException          *UltiAssertException*
+
+Function that tests if a given function throws exceptions when you want it to.
+This test can check for a specific exception, or for all exceptions.
+
+Beware, when testing for exceptions, if you don't catch the right exception, the
+one actually thrown will still get through and can mess with the execution of
+the rest of your sub-tests and tests.
+
+    Usage: >
+
+        call UltiAssertInOutput(desc, fx, arguments, pattern, expectation, skip)
+
+
+'desc' == string description of the sub-test's purpose.
+
+'filename' == the path to the file you wish to search through.
+
+'fx' == the string name of the function you wish to test. Do not include the
+    parentheses.
+
+'arguments' == an explicit list of the arguments you wish to pass to fx. If no
+    arguments are needed, you must still supply an empty list.
+
+'pattern' == a substring or vim regex that matches the exception you are
+    checking for. If you want it to check if it throws an exception at all,
+    make this an empty string ''.
+
+'expectation' == either the string 'true' or 'false' to indicate whether you
+    the Assertion to be true or false.
+
+'skip' == an optional argument that can be nothing, or the string 'skip' to.
+    indicate you don't wish to evaluate that test currently.
+
+    Examples: >
+
+        " Assume HelloPerson() is a function that accepts zero, one or two
+        " arguments and echos 'Hello [names]', but throws an error when given
+        " more than 3 arguments, or if any of the arguments aren't strings.
+        call UltiAssertException('Test throws error for 3 people',
+                    \ 'HelloPerson', ['Kevin', 'Jeff', 'Danielle'],
+                    \ 'Given too many arguments', 'true')
+        call UltiAssertInOutput("Test that number's aren't allowed',
+                    \ 'HelloPerson', [2, 3], 'Improper argument', 'true')
+        call UltiAssertInOutput('Test that normal execution is fine',
+                    \ 'HelloPerson', ['Kevin'], '', 'false')
+
 ------------------------------------------------------------------------------
-      3. UltiAssertException          *UltiAssertException*
+4d. Example Functions
+
+These are included functions that you can run out of the box to see what the
+output of the testing suite is like. And, more importantly, to verify that
+this plugin is installed, configured, and written correctly.
+
 ------------------------------------------------------------------------------
-   d. Example Functions
+4d.1 UltiTestSelfUnit             *UltiTestSelfUnit*
+
+This function takes no arguments and runs all the unit tests written for this
+plugin. If you've been running your other tests before this, please call
+|UltiTestResetAll| before calling this.
+
+    Usage: >
+
+        :call UltiTestSelfUnit()
 ------------------------------------------------------------------------------
-      1. UltiTestSelfUnit             *UltiTestSelfUnit*
-------------------------------------------------------------------------------
-      2. UltiTestExampleUnit          *UltiTestExampleUnit*
-------------------------------------------------------------------------------
+4d.2 UltiTestExampleUnit          *UltiTestExampleUnit*
+
+This function takes no arguments and runs several different example tests than
+the ones shown here. If you've been running your other tests before this,
+please call |UltiTestResetAll| before calling this. These tests are more
+experimental on my part and should only be run if you're curious and bored.
+
+    Usage: >
+
+        :call UltiTestExampleUnit()
+
 
 ==============================================================================
 5. Configuration                      *Ultimate-Test-Utility-Config*
 
-------------------------------------------------------------------------------
-   a. g:ulti_test_verbose             *ulti_test_verbose*
-------------------------------------------------------------------------------
-   b. g:ulti_test_rethrow             *ulti_test_rethrow*
-------------------------------------------------------------------------------
-   c. g:ulti_test_mode                *ulti_test_mode*
+Configuration is quite simple. Once the plugin is installed, see the README
+for instructions, the default configuration is enough to get you started.
+Right now, there is only one global variable introduced, |g:ulti_test_verbose|.
+
+
+                                       *g:ulti_test_verbose*
+g:ulti_test_verbose~
+
+Default: 1
+
+Overview:
+
+    This setting controls the level of reporting done while tests are
+    executed.
+    You may set this in your '.vimrc' or '_vimrc' and/or you can set it to
+    your liking before running individual tests.
+    
+    When set to 2, you are notified when tests are started and stopped.
+    Additionally, each sub-test gets a oneline description as it executes with
+    a report on its success. When calling |UltiTestReport|, brief subtests
+    statistics and a one-line pass or fail notification is issued.
+
+    When set to 1, you are not notified when tests are started and stopped.
+    Additionally, only failed subtests get a line report. The behavior when
+    calling |UltiTestReport| is the same as when set to 2.
+
+    When set to 0, you are not notified when tests are started and stopped.
+    Additionally, only failed subtests get a line report. Also, when calling
+    |UltiTestReport| only tests with one or more failed subtest will actually
+    be reported. This way you can change the level of reporting with just one
+    variable without removing calls to |UltiTestReport|.
+
+Usage:
+
+    You can test the various levels of reporting with tests in
+    |UltiTestSelfUnit|. >
+
+    :let g:ulti_test_verbose = 2
+    :call UltiTestSelfUnit()
+
+    :let g:ulti_test_verbose = 1
+    :call UltiTestSelfUnit()
+
+    :let g:ulti_test_verbose = 0
+    :call UltiTestSelfUnit()
 
 ==============================================================================
 /* vim: set ft=help: */
