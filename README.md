@@ -53,7 +53,6 @@ languages to be installed.
 ```bash
 cd ~/.vim/bundle
 git clone https://github.com/biskark/vim-ultimate-colorscheme-utility.git
-git checkout menu_integration
 ```
 
 ### From archive
