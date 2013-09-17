@@ -1,5 +1,5 @@
-Vim Ultimate Unit Test
-======================
+Vim Ultimate Test Utility
+=========================
 
 Introduction                      
 ------------
