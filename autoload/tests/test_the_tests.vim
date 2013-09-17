@@ -354,10 +354,9 @@ endfunction
 " }}}
 
 " For plugin/ulti_test.vim {{{
-
 " Test_Assert_In_String {{{
 function! tests#test_the_tests#Test_Assert_In_String()
-    call UltiTestStart("UltiAssertInString()")
+    call UltiTestStart("UltiAssertInString tests")
 
     call UltiTestStop()
     call UltiTestReport()
@@ -374,6 +373,14 @@ endfunction
 " Test_Assert_In_Buffer {{{
 function! tests#test_the_tests#Test_Assert_In_Output()
     call UltiTestStart("UltiAssertInBuffer()")
+
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
+" Test_Assert_In_File {{{
+function! tests#test_the_tests#Test_Assert_In_File()
+    call UltiTestStart("UltiAssertInFile")
 
     call UltiTestStop()
     call UltiTestReport()

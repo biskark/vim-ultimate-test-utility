@@ -18,6 +18,14 @@ let did_ultimate_test_utility = 1
 if !exists('g:ulti_test_verbose')
     let g:ulti_test_verbose = 1
 endif
+
+if !exists('g:ulti_test_rethrow')
+    let g:ulti_test_rethrow = 0
+endif
+
+if !exists('g:ulti_test_auto_restore')
+    let g:ulti_test_auto_restore = 0
+endif
 " }}}
 
 " Script Variables {{{
@@ -32,6 +40,9 @@ let s:number_subtests_passed = 0
 let s:number_subtests_failed = 0
 let s:number_subtests_skipped = 0
 let s:test_name = ''
+
+" Variables involved in UltiStore
+let s:stored_variables = {}
 
 " End Script Variables }}}
 
@@ -145,16 +156,31 @@ endfunction
 " arguments is a list of any arguments to be supplied to the fx.
 " Can optionally add the string 'skip' to the end of the parameter list to
 " indicate that this test should be skipped.
+"
+" Catches all other errors if g:ulti_test_rethrow == 0 and counts it as a
+" fail. If g:ulti_test_rethrow == 1 it doesn't catch the error and propagates
+" it up through Vim.
 function! UltiAssertException(desc, fx, arguments, error, expectation, ...)
     let skip = a:0 > 0 ? a:1 : ""
     let retval = 0
     let error = 0
-    execute "try"
-            \."\n    silent call call(a:fx, a:arguments, {})"
-            \."\ncatch /".a:error."/"
-            \."\n    let retval = 1"
-            \."\nendtry"
-    call s:Test_Retval(retval, a:expectation, a:desc, skip)
+    let message = a:desc
+    if g:ulti_test_rethrow
+        execute "try"
+                \."\n    silent call call(a:fx, a:arguments, {})"
+                \."\ncatch /".a:error."/"
+                \."\n    let retval = 1"
+                \."\nendtry"
+    else
+        execute "try"
+                \."\n    silent call call(a:fx, a:arguments, {})"
+                \."\ncatch /".a:error."/"
+                \."\n    let retval = 1"
+                \."\ncatch"
+                \."\n    let message .= ' (Warning: Unexpected exception thrown)'"
+                \."\nendtry"
+    endif
+    call s:Test_Retval(retval, a:expectation, message, skip)
 endfunction
 " }}}
 " End Assertion Functions }}}
@@ -326,21 +352,21 @@ function! UltiTestSelfUnit()
     call tests#test_the_tests#Test_Key_In_Dict()
     call tests#test_the_tests#Test_Value_In_Dict()
     " }}}
-    " " Assert Tests {{{
+    " Assert Tests {{{
     " Currently not implemented as the extreme circular logic makes my head
     " hurt.
     " Instead, the basic unit tests above use the Assert Tests in total while
     " testing the core functional components that they're based off of.
     " Don't judge me too harshly for not having these.
     "
-    " call tests#test_the_tests#Test_Assert_In_String()
+    call tests#test_the_tests#Test_Assert_In_String()
     " call tests#test_the_tests#Test_Assert_In_Output()
     " call tests#test_the_tests#Test_Assert_In_Buffer()
-    " call tests#test_the_tests#Test_Assert_True()
-    " call tests#test_the_tests#Test_Assert_Equals()
+    " call tests#test_the_tests#Test_Assert_In_File()
+    " call tests#test_the_tests#Test_Assert_True() " call tests#test_the_tests#Test_Assert_Equals()
     " call tests#test_the_tests#Test_Assert_Empty()
     " call tests#test_the_tests#Test_Assert_Exception()
-    " " }}}
+    " }}}
     call UltiTestFinalSummary()
     call UltiTestResetAll()
 endfunction
@@ -412,3 +438,36 @@ function! s:Test_Retval(retval, expectation, message, skip)
 endfunction
 " }}}
 " End Utility Functions }}}
+
+" Global Utility Functions {{{
+" UltiTestStore {{{ 
+" Function that stores variables passed to it so that they can be easily
+" restored later. Handy for making tests that check the affect different
+" settings have on a plugin.
+" Accepts any number of arguments, but each argument should be a string with
+" the qualified name of the variable you wish to store.
+" Remember scoping rules still apply to this function and may not work for all
+" variables.
+" Uses vim's deepcopy to save the variable.
+function UltiTestStore(...)
+    if a:0 == 0
+        throw "Not enough arguments"
+    endif
+    for item in a:000
+        if exists(item)
+            TODO
+            let s:stored_variables[item] = INTERPOLATE VARIABLE
+        endif
+    endfor
+endfunction
+" }}}
+" UltiTestRestore {{{ 
+" Function that restores the values of variables that were passed to
+" UltiTestStore.
+" Each argument should be the qualified string name of the variable to
+" restore.
+" If no values are passed, restores everything.
+function UltiTestRestore(...)
+endfunction
+" }}}
+" }}}

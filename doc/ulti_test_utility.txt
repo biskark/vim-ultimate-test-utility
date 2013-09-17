@@ -899,9 +899,18 @@ different situations.
 Function that tests if a given function throws exceptions when you want it to.
 This test can check for a specific exception, or for all exceptions.
 
-Beware, when testing for exceptions, if you don't catch the right exception, the
-one actually thrown will still get through and can mess with the execution of
-the rest of your sub-tests and tests.
+The value of |g:ulti_test_rethrow| affects the reporting process for when
+exceptions that aren't expected are thrown during the execution of this
+sub-test.
+
+When |g:ulti_test_rethrow| is set to 0 (default), the exception is caught and
+the test is counted as a fail.
+
+When |g:ulti_test_rethrow| is 1, the exception is not caught and is propagated
+upwards. This will most likely break the test function and prevent it from
+completing, but allows potentially vital exceptions to reach their intended
+targets. If this occurs, you will need to run |UltiTestStop| and |UltiTestReset|
+manually before running any more tests or sub-tests.
 
     Usage: >
 
@@ -1019,6 +1028,29 @@ Usage:
 
     :let g:ulti_test_verbose = 0
     :call UltiTestSelfUnit()
+
+------------------------------------------------------------------------------
+                                       *g:ulti_test_rethrow*
+g:ulti_test_rethrow~
+
+Default: 1
+
+Overview:
+
+    The value of |g:ulti_test_rethrow| affects the reporting process for when
+    exceptions that aren't expected are thrown during the execution of 
+    |UltiAssertException|.
+
+    When |g:ulti_test_rethrow| is set to 0, the exception is caught and the test
+    is counted as a fail.
+
+    When |g:ulti_test_rethrow| is 1, the exception is not caught and is
+    propagated upwards. This will most likely break the test function and
+    prevent it from completing, but allows potentially vital exceptions to
+    reach their intended targets. If this occurs, you will need to run
+    |UltiTestStop| and |UltiTestReset| manually before running any more tests or
+    sub-tests.
+
 
 ==============================================================================
 /* vim: set ft=help: */
