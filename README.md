@@ -97,6 +97,7 @@ functions and 1 keymapping may have 5 total "tests", with each "test"
 consisting of up to dozens of "sub-tests."
 
 The basic workflow is simple.
+
 1. You MUST call UltiTestStart to tell vim that you are going into
    "test-mode".
 2. You then call as many UltiAssert... sub-tests as you need.
@@ -104,7 +105,7 @@ The basic workflow is simple.
 4. You may then call UltiTestReport which will give a report of varying
    detail about the success and failure of your sub-tests. Additionally, this
    will report the overall success of the entire test. The degree of detail
-   reported is dependent on the value of g:ulti_test_verbose. See
+   reported is dependent on the value of g:ulti\_test\_verbose. See
    Ultimate-Test-Utility-Config for more details.
 5. If you wish to execute more tests (ie. more groupds of sub-tests), you
    should call UltiTestReset.
@@ -181,6 +182,7 @@ actual sub-tests themselves.
 Each sub-test available starts with 'UltiAssert'.
 Each UltiAssert function has a slightly different argument signature but there
 are some similarities in usage.
+
 1. The first argument is a string describing the purpose of the test. Notice
    this message was displayed when sub-test 3 failed. Descriptive messages
    make pin-pointing problems quick, but you may provide an empty string like
