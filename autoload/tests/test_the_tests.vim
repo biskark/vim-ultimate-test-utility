@@ -354,6 +354,118 @@ endfunction
 " }}}
 
 " For plugin/ulti_test.vim {{{
+" Test_Ulti_Test_StoreRestore {{{
+function! tests#test_the_tests#Test_Ulti_Test_StoreRestore()
+    let g:ulti_test_verbose = 2
+
+    call UltiTestStart("Tests for interaction between Store and Restore")
+    " Single variable tests {{{
+    " Test a provided global variable
+    let l:var1 = g:ulti_test_rethrow
+    call UltiTestStore('g:ulti_test_rethrow')
+    call UltiAssertEquals("UltiTestStore doesn't change the passed in variable",
+                \ l:var1, g:ulti_test_rethrow, 'true')
+    let g:ulti_test_rethrow = g:ulti_test_rethrow ? 0 : 1
+    call UltiAssertEquals("Variable has been changed",
+                \ l:var1, g:ulti_test_rethrow, 'false')
+    call UltiTestRestore('g:ulti_test_rethrow')
+    call UltiAssertEquals("Variable has been changed back",
+                \ l:var1, g:ulti_test_rethrow, 'true')
+    let g:ulti_test_rethrow = l:var1  " Isn't necessary if the last test passed
+
+    " Same test but with different calling technique
+    call UltiTestStore(['g:ulti_test_rethrow'])
+    call UltiAssertEquals("UltiTestStore doesn't change the passed in " .
+                \ "variable in a List", l:var1, g:ulti_test_rethrow, 'true')
+    let g:ulti_test_rethrow = g:ulti_test_rethrow ? 0 : 1
+    call UltiAssertEquals("Variable has been changed, again",
+                \ l:var1, g:ulti_test_rethrow, 'false')
+    call UltiTestRestore()
+    call UltiAssertEquals("Variable has been changed back, using no arguments",
+                \ l:var1, g:ulti_test_rethrow, 'true')
+    " }}}
+    " Multiple variable tests {{{
+    " As raw arguments
+    let l:var2 = g:ulti_test_rethrow
+    let l:var3 = g:syntax_on
+    let l:var4 = 'g:UltiTestForNonExistentPurposesPleaseDontNameAVariableThis'
+    call UltiTestStore('g:ulti_test_rethrow', 'g:syntax_on', l:var4)
+    let g:ulti_test_rethrow = g:ulti_test_rethrow ? 0 : 1
+    call UltiAssertEquals('rethrow changed', l:var2, g:ulti_test_rethrow,
+                \ 'false')
+    let g:syntax_on = g:syntax_on ? 0 : 1
+    call UltiAssertEquals('syntax_on changed', l:var3, g:syntax_on, 'false')
+    call UltiAssertTrue("Var with long name doesn't exist", exists(l:var4),
+                \ 'false')
+    execute "let " . l:var4 . " = 1"
+    call UltiAssertTrue("Var with long name now exists", exists(l:var4),
+                \ 'true')
+    call UltiTestRestore('g:ulti_test_rethrow', l:var4)
+    call UltiAssertEquals('rethrow restored in first call to Restore', l:var2,
+                \ g:ulti_test_rethrow, 'true')
+    call UltiAssertTrue("Var with long name no longer exists again after " .
+                \ "first call to Restore", exists(l:var4), 'false')
+    call UltiAssertEquals('syntax_on not restored in first call to Restore',
+                \ l:var3, g:syntax_on, 'false')
+    call UltiTestRestore('g:syntax_on')
+    call UltiAssertEquals('syntax_on restored in second call to Restore',
+                \ l:var3, g:syntax_on, 'true')
+    let g:ulti_test_rethrow = l:var2
+    let g:syntax_on = l:var3
+    " }}}
+    " As a list of arguments {{{
+    call UltiTestStore(['g:ulti_test_rethrow', 'g:syntax_on', l:var4])
+    let g:ulti_test_rethrow = g:ulti_test_rethrow ? 0 : 1
+    call UltiAssertEquals('rethrow changed after stored with List', l:var2, g:ulti_test_rethrow,
+                \ 'false')
+    let g:syntax_on = g:syntax_on ? 0 : 1
+    call UltiAssertEquals('syntax_on changed after stored with List', l:var3, g:syntax_on, 'false')
+    call UltiAssertTrue("Var with long name doesn't exist after stored " .
+                \ "with List", exists(l:var4), 'false')
+    execute "let " . l:var4 . " = 1"
+    call UltiAssertTrue("Var with long name now exists after stored with " .
+                \ " List", exists(l:var4), 'true')
+    call UltiTestRestore(['g:ulti_test_rethrow', 'g:syntax_on', l:var4])
+    call UltiAssertEquals('rethrow restored after stored with List', l:var2,
+                \ g:ulti_test_rethrow, 'true')
+    call UltiAssertEquals('syntax_on restored after stored with List', l:var3,
+                \ g:syntax_on, 'true')
+    call UltiAssertTrue("Var with long name no longer exists again after " .
+                \ "stored with List", exists(l:var4), 'false')
+    let g:ulti_test_rethrow = l:var2
+    let g:syntax_on = l:var3
+    " }}}
+    " As a list of lists of arguments for Store and no specifics for Stop {{{
+    call UltiTestStore(['g:ulti_test_rethrow', ['g:syntax_on', l:var4]])
+    let g:ulti_test_rethrow = g:ulti_test_rethrow ? 0 : 1
+    call UltiAssertEquals('rethrow changed after stored with List in List',
+                \ l:var2, g:ulti_test_rethrow, 'false')
+    let g:syntax_on = g:syntax_on ? 0 : 1
+    call UltiAssertEquals('syntax_on changed after stored with List in List',
+                \ l:var3, g:syntax_on, 'false')
+    call UltiAssertTrue("Var with long name doesn't exist after stored " .
+                \ "with List in List", exists(l:var4), 'false')
+    execute "let " . l:var4 . " = 1"
+    call UltiAssertTrue("Var with long name now exists after stored with " .
+                \ "List in List", exists(l:var4), 'true')
+    call UltiTestRestore()
+    call UltiAssertEquals('rethrow restored after no argument Restore', l:var2,
+                \ g:ulti_test_rethrow, 'true')
+    call UltiAssertEquals('syntax_on restored after no argument Restore',
+                \ l:var3, g:syntax_on, 'true')
+    call UltiAssertTrue("Var with long name no longer exists after no " .
+                \ "argument Restore" , exists(l:var4), 'false')
+    let g:ulti_test_rethrow = l:var2
+    let g:syntax_on = l:var3
+    " }}}
+    " Nested datastructures {{{
+    " }}}
+    " Exceptions {{{
+    " }}}
+    call UltiTestStop()
+    call UltiTestReport()
+endfunction
+" }}}
 " Test_Assert_In_String {{{
 function! tests#test_the_tests#Test_Assert_In_String()
     call UltiTestStart("UltiAssertInString tests")
@@ -371,7 +483,7 @@ function! tests#test_the_tests#Test_Assert_In_Output()
 endfunction
 " }}}
 " Test_Assert_In_Buffer {{{
-function! tests#test_the_tests#Test_Assert_In_Output()
+function! tests#test_the_tests#Test_Assert_In_Buffer()
     call UltiTestStart("UltiAssertInBuffer()")
 
     call UltiTestStop()

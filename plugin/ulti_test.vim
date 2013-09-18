@@ -43,6 +43,7 @@ let s:test_name = ''
 
 " Variables involved in UltiStore
 let s:stored_variables = {}
+let s:nonexistent_variables = []
 
 " End Script Variables }}}
 
@@ -336,37 +337,121 @@ function! UltiTestFinalSummary()
     endif
 endfunction
 " }}}
+" UltiTestStore {{{ 
+" Function that stores variables passed to it so that they can be easily
+" restored later. Handy for making tests that check the affect different
+" settings have on a plugin.
+" Accepts any number of arguments, but each argument should be a string with
+" the qualified name of the variable you wish to store, or a list of strings.
+" Remember scoping rules still apply to this function and may not work for all
+" variables.
+" Uses vim's deepcopy to save the variable.
+function UltiTestStore(...)
+    if a:0 == 0
+        throw "Not enough arguments"
+    endif
+    for item in a:000
+        if type(item) ==# type("string")
+            " Store existing variables with their values in a Dict
+            if exists(item)
+                execute "let s:stored_variables[item] = deepcopy(" . item . ")"
+            " Store nonexistent variable(oxymoron) in a List
+            else
+                call add(s:nonexistent_variables, item)
+            endif
+        elseif type(item) ==# type([])
+            let l:count = 0
+            while l:count < len(item)
+                call UltiTestStore(item[l:count])
+                let l:count += 1
+            endwhile
+        else
+            throw "Argument must be a variable name as a string, or a List " .
+                        \ "of Strings"
+        endif
+    endfor
+endfunction
+" }}}
+" UltiTestRestore {{{ 
+" Function that restores the values of variables that were passed to
+" UltiTestStore.
+" Each argument should be the qualified string name of the variable to
+" restore, or a list of Strings.
+" If no values are passed, restores everything.
+function UltiTestRestore(...)
+    " l:varlist is either the list of arguments passed in, or every previously
+    " stored variable
+    let l:varlist = a:000
+    if a:0 == 0
+        let l:varlist = s:nonexistent_variables + keys(s:stored_variables)
+    endif
+    for item in l:varlist
+        " For strings
+        if type(item) ==# type("string")
+            if exists(item)
+                " If it didn't exist before, remove it from global scope and
+                " list of stored
+                if index(s:nonexistent_variables, item) >= 0
+                    execute "unlet " . item
+                    call remove(s:nonexistent_variables,
+                                \ index(s:nonexistent_variables, item))
+                " If it did exist before, restore it to previous value and
+                " remove it from dict of stored
+                elseif has_key(s:stored_variables, item)
+                    execute "let " . item . " = " .
+                                \ "deepcopy(s:stored_variables[item])"
+                    unlet s:stored_variables[item]
+                " Or complain
+                else
+                    throw "Cannot restore unstored variable"
+                endif
+            else
+                throw "Variable in argument must exist"
+            endif
+        " Recursively call on any lists
+        elseif type(item) ==# type([])
+            for subitem in item
+                call UltiTestRestore(subitem)
+            endfor
+        else
+            throw "Argument must be a String or a List of Strings"
+        endif
+    endfor
+endfunction
+" }}}
 " UltiTestSelfUnit {{{
 " Function that runs all the tests for this plugin.
 function! UltiTestSelfUnit()
     call UltiTestReset()
-    " Basic {{{
-    call tests#test_the_tests#Test_Is_Empty()
-    call tests#test_the_tests#Test_Is_Equals()
-    call tests#test_the_tests#Test_Is_True()
-    call tests#test_the_tests#Test_In_String()
-    call tests#test_the_tests#Test_In_Buffer()
-    call tests#test_the_tests#Test_In_Output()
-    call tests#test_the_tests#Test_In_File()
-    call tests#test_the_tests#Test_In_List()
-    call tests#test_the_tests#Test_Key_In_Dict()
-    call tests#test_the_tests#Test_Value_In_Dict()
+    " " Basic {{{
+    " call tests#test_the_tests#Test_Is_Empty()
+    " call tests#test_the_tests#Test_Is_Equals()
+    " call tests#test_the_tests#Test_Is_True()
+    " call tests#test_the_tests#Test_In_String()
+    " call tests#test_the_tests#Test_In_Buffer()
+    " call tests#test_the_tests#Test_In_Output()
+    " call tests#test_the_tests#Test_In_File()
+    " call tests#test_the_tests#Test_In_List()
+    " call tests#test_the_tests#Test_Key_In_Dict()
+    " call tests#test_the_tests#Test_Value_In_Dict()
+    " " }}}
+    " Utilities {{{
+    call tests#test_the_tests#Test_Ulti_Test_StoreRestore()
     " }}}
-    " Assert Tests {{{
-    " Currently not implemented as the extreme circular logic makes my head
-    " hurt.
-    " Instead, the basic unit tests above use the Assert Tests in total while
-    " testing the core functional components that they're based off of.
-    " Don't judge me too harshly for not having these.
-    "
-    call tests#test_the_tests#Test_Assert_In_String()
+    " " Assert Tests {{{
+    " " Currently not implemented as the extreme circular logic makes my head
+    " " hurt.
+    " " Instead, the basic unit tests above use the Assert Tests in total while
+    " " testing the core functional components that they're based off of.
+    " " Don't judge me too harshly for not having these.
+    " call tests#test_the_tests#Test_Assert_In_String()
     " call tests#test_the_tests#Test_Assert_In_Output()
     " call tests#test_the_tests#Test_Assert_In_Buffer()
     " call tests#test_the_tests#Test_Assert_In_File()
     " call tests#test_the_tests#Test_Assert_True() " call tests#test_the_tests#Test_Assert_Equals()
     " call tests#test_the_tests#Test_Assert_Empty()
     " call tests#test_the_tests#Test_Assert_Exception()
-    " }}}
+    " " }}}
     call UltiTestFinalSummary()
     call UltiTestResetAll()
 endfunction
@@ -438,36 +523,3 @@ function! s:Test_Retval(retval, expectation, message, skip)
 endfunction
 " }}}
 " End Utility Functions }}}
-
-" Global Utility Functions {{{
-" UltiTestStore {{{ 
-" Function that stores variables passed to it so that they can be easily
-" restored later. Handy for making tests that check the affect different
-" settings have on a plugin.
-" Accepts any number of arguments, but each argument should be a string with
-" the qualified name of the variable you wish to store.
-" Remember scoping rules still apply to this function and may not work for all
-" variables.
-" Uses vim's deepcopy to save the variable.
-function UltiTestStore(...)
-    if a:0 == 0
-        throw "Not enough arguments"
-    endif
-    for item in a:000
-        if exists(item)
-            TODO
-            let s:stored_variables[item] = INTERPOLATE VARIABLE
-        endif
-    endfor
-endfunction
-" }}}
-" UltiTestRestore {{{ 
-" Function that restores the values of variables that were passed to
-" UltiTestStore.
-" Each argument should be the qualified string name of the variable to
-" restore.
-" If no values are passed, restores everything.
-function UltiTestRestore(...)
-endfunction
-" }}}
-" }}}
