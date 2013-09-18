@@ -13,6 +13,9 @@ Ultimate-Test-Utility is maintained solely by Kevin Biskar and is constantly
 expanding it's features. If you have any concerns, feature requests, or have
 found any undocumented bugs, please notify him (me).
 
+Ultimate-Test-Utility can also be found at
+[vim.org](http://www.vim.org/scripts/script.php?script_id=4724), but this is
+not recommended as that won't be as current this repository.
 
 Features and Requirements          
 -------------------------
@@ -53,6 +56,14 @@ languages to be installed.
 ```bash
 cd ~/.vim/bundle
 git clone https://github.com/biskark/vim-ultimate-colorscheme-utility.git
+```
+
+That's enough to get the latest stable release, but if you'd like to keep
+up-to-date with the latest developments, continue with...
+
+```bash
+cd ~/.vim/bundle/vim-ultimate-test-utility/
+git checkout latest
 ```
 
 ### From archive
