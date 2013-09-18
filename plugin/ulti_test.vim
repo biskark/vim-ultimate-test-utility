@@ -350,26 +350,28 @@ function UltiTestStore(...)
     if a:0 == 0
         throw "Not enough arguments"
     endif
-    for item in a:000
-        if type(item) ==# type("string")
+    let i = 0
+    while i < len(a:000)
+        if type(a:000[i]) ==# type("string")
             " Store existing variables with their values in a Dict
-            if exists(item)
-                execute "let s:stored_variables[item] = deepcopy(" . item . ")"
+            if exists(a:000[i])
+                execute "let s:stored_variables[a:000[i]] = deepcopy(" . a:000[i] . ")"
             " Store nonexistent variable(oxymoron) in a List
             else
-                call add(s:nonexistent_variables, item)
+                call add(s:nonexistent_variables, a:000[i])
             endif
-        elseif type(item) ==# type([])
+        elseif type(a:000[i]) ==# type([])
             let l:count = 0
-            while l:count < len(item)
-                call UltiTestStore(item[l:count])
+            while l:count < len(a:000[i])
+                call UltiTestStore(a:000[i][l:count])
                 let l:count += 1
             endwhile
         else
             throw "Argument must be a variable name as a string, or a List " .
                         \ "of Strings"
         endif
-    endfor
+        let i += 1
+    endwhile
 endfunction
 " }}}
 " UltiTestRestore {{{ 
@@ -423,18 +425,18 @@ endfunction
 " Function that runs all the tests for this plugin.
 function! UltiTestSelfUnit()
     call UltiTestReset()
-    " " Basic {{{
-    " call tests#test_the_tests#Test_Is_Empty()
-    " call tests#test_the_tests#Test_Is_Equals()
-    " call tests#test_the_tests#Test_Is_True()
-    " call tests#test_the_tests#Test_In_String()
-    " call tests#test_the_tests#Test_In_Buffer()
-    " call tests#test_the_tests#Test_In_Output()
-    " call tests#test_the_tests#Test_In_File()
-    " call tests#test_the_tests#Test_In_List()
-    " call tests#test_the_tests#Test_Key_In_Dict()
-    " call tests#test_the_tests#Test_Value_In_Dict()
-    " " }}}
+    " Basic {{{
+    call tests#test_the_tests#Test_Is_Empty()
+    call tests#test_the_tests#Test_Is_Equals()
+    call tests#test_the_tests#Test_Is_True()
+    call tests#test_the_tests#Test_In_String()
+    call tests#test_the_tests#Test_In_Buffer()
+    call tests#test_the_tests#Test_In_Output()
+    call tests#test_the_tests#Test_In_File()
+    call tests#test_the_tests#Test_In_List()
+    call tests#test_the_tests#Test_Key_In_Dict()
+    call tests#test_the_tests#Test_Value_In_Dict()
+    " }}}
     " Utilities {{{
     call tests#test_the_tests#Test_Ulti_Test_StoreRestore()
     " }}}

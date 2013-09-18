@@ -1,0 +1,13 @@
+0.0.1 - Convenience Function Added, self tests updated
+September 18, 2013
+New Feature:
+	Two new convenience functions have been added, UltiTestStore and
+	UltiTestRestore, that allow for easy saving and restoring of global
+	variables. This should help you play nice when having endusers run your
+	tests.
+Other:
+	Additional tests for the plugin itself have been added to
+	UltiTestSelfUnit.
+
+0.0.0 - Initial Version
+September 16, 2013
