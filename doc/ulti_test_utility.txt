@@ -42,7 +42,11 @@ Ultimate_test_utility            *Ultimate-Test-Utility*
       1. UltiAssertInOutput           |UltiAssertInOutput|
       2. UltiAssertException          |UltiAssertException|
 
-   d. Example Functions
+   d. Convenience Functions           |Ultimate-Test-Convenience-Functions|
+      1. UltiTestStore                |UltiTestStore|
+      2. UltiTestRestore              |UltiTestRestore|
+
+   e. Example Functions
       1. UltiTestSelfUnit             |UltiTestSelfUnit|
       2. UltiTestExampleUnit          |UltiTestExampleUnit|
 
@@ -951,14 +955,71 @@ manually before running any more tests or sub-tests.
                     \ 'HelloPerson', ['Kevin'], '', 'false')
 
 ------------------------------------------------------------------------------
-4d. Example Functions
+4d. Convenience Functions           *Ultimate-Test-Convenience-Functions*
+
+These are collection of functions that are designed to make your testing life
+easier. These functions are purely optional but can be real time savers if
+combined with creative testing.
+
+------------------------------------------------------------------------------
+4d.1 UltiTestStore                *UltiTestStore*
+
+This function saves the state of variables you pass to it. These variables can
+then be restored to their original values with  |UltiTestRestore| once you're
+done using them. This can handy for checking the effects variables have on the
+behavior of your plugin. Even if you don't use these functions, please make
+sure you play nice with the Vim user's settings. If you expect them to run
+your tests on their machine, don't change permanently change their settings.
+This also works if you want to test the impact of variables that aren't
+defined yet. In this case, when you call |UltiTestRestore| those variables
+will be cleaned up from the global namespace.
+
+The function takes String names for the variables you wish to later restore.
+These names can be provided one-by-one or in a List you've made yourself and
+provided in one argument. It uses Vim's 'deepcopy' to save your variables so you
+may pass nested data structures to it if needed.
+
+    Usage: >
+
+        call UltiTestStore('g:fictional_variable1', 'g:fictional_variable2')
+        call UltiTestRestore()
+
+        call UltiTestStore(['g:fictional_variable3', 'g:fictional_variable4'])
+        call UltiTestRestore('g:fictional_variable3', 'g:fictional_variable4')
+
+------------------------------------------------------------------------------
+4d.2 UltiTestRestore              *UltiTestRestore*
+
+This function restores the state of variables you passed to it in |UltiTestStore|.
+If the variable didn't exist when you call UltiTestStore, you
+
+The function takes String names for the variables you wish to later restore.
+These names can be provided one-by-one or in a List you've made yourself and
+provided in one argument. If you provide no arguments, all previously stored
+variables are restored.
+
+Note: Because |UltiTestStore| uses 'deepcopy', the item restored in an
+identical copy of the original, not original item. While this shouldn't
+usually be a problem, beware when using it on variables where identity is
+important.
+
+    Usage: >
+
+        call UltiTestStore('g:fictional_variable1', 'g:fictional_variable2')
+        call UltiTestRestore()
+
+        call UltiTestStore(['g:fictional_variable3', 'g:fictional_variable4'])
+        call UltiTestRestore('g:fictional_variable3', 'g:fictional_variable4')
+
+------------------------------------------------------------------------------
+4e. Example Functions
 
 These are included functions that you can run out of the box to see what the
 output of the testing suite is like. And, more importantly, to verify that
 this plugin is installed, configured, and written correctly.
 
 ------------------------------------------------------------------------------
-4d.1 UltiTestSelfUnit             *UltiTestSelfUnit*
+4e.1 UltiTestSelfUnit             *UltiTestSelfUnit*
 
 This function takes no arguments and runs all the unit tests written for this
 plugin. If you've been running your other tests before this, please call
@@ -968,7 +1029,7 @@ plugin. If you've been running your other tests before this, please call
 
         :call UltiTestSelfUnit()
 ------------------------------------------------------------------------------
-4d.2 UltiTestExampleUnit          *UltiTestExampleUnit*
+4e.2 UltiTestExampleUnit          *UltiTestExampleUnit*
 
 This function takes no arguments and runs several different example tests than
 the ones shown here. If you've been running your other tests before this,

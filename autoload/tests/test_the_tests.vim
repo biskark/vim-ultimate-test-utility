@@ -356,9 +356,7 @@ endfunction
 " For plugin/ulti_test.vim {{{
 " Test_Ulti_Test_StoreRestore {{{
 function! tests#test_the_tests#Test_Ulti_Test_StoreRestore()
-    let g:ulti_test_verbose = 2
-
-    call UltiTestStart("Tests for interaction between Store and Restore")
+    call UltiTestStart("Tests for interaction between Store and Restore", 49)
     " Single variable tests {{{
     " Test a provided global variable
     let l:var1 = g:ulti_test_rethrow
@@ -459,8 +457,67 @@ function! tests#test_the_tests#Test_Ulti_Test_StoreRestore()
     let g:syntax_on = l:var3
     " }}}
     " Nested datastructures {{{
+    let l:dict1_name = 'g:UltiTestForDictOnePleaseDontUseThisVariable'
+    let l:dict2_name = 'g:UltiTestForDictTwoPleaseDontUseThisVariable'
+    let l:dict3_name = 'g:UltiTestForDictThreePleaseDontUseThisVariable'
+    execute "let " . l:dict1_name . " = {'test1': 'case1'}"
+    execute "let " . l:dict2_name . " = {'test2': 'case2', 'dict1': " .
+                \ "deepcopy(" . l:dict1_name . ")}"
+    execute "call UltiAssertEquals('Dict1 and Dict2[Dict1] are equal'," .
+                \ l:dict1_name . ", " . l:dict2_name . "['dict1'], 'true')"
+    call UltiAssertTrue('Dict1 exists', exists(l:dict1_name), 'true')
+    call UltiAssertTrue('Dict2 exists', exists(l:dict2_name), 'true')
+    call UltiAssertTrue("Dict3 doesn't exist", exists(l:dict3_name), 'false')
+    execute "let l:dict1 = deepcopy(" . l:dict1_name . ")"
+    execute "let l:dict2 = deepcopy(" . l:dict2_name . ")"
+    execute "call UltiAssertEquals('Dict1 saved', " . l:dict1_name .
+                \ ", l:dict1, 'true')"
+    execute "call UltiAssertEquals('Dict2 saved', " . l:dict2_name .
+                \ ", l:dict2, 'true')"
+    call UltiTestStore([l:dict1_name, l:dict2_name], l:dict3_name)
+    execute "let " . l:dict1_name . "['new'] = 'item'"
+    execute "call UltiAssertEquals('Dict1 changed', " . l:dict1_name .
+                \ ", l:dict1, 'false')"
+    execute "let " . l:dict2_name . "['dict1']['new2'] = 'item2'"
+    execute "call UltiAssertEquals('Dict2 changed', " . l:dict2_name .
+                \ ", l:dict2, 'false')"
+    execute "call UltiAssertEquals('Dict1 and Dict2[Dict1] are not equal'," .
+                \ l:dict1_name . ", " . l:dict2_name . "['dict1'], 'false')"
+    execute "let " . l:dict3_name . " = {'test3': 'case3'}"
+    call UltiAssertTrue("Dict3 now exists", exists(l:dict3_name), 'true')
+    call UltiTestRestore()
+    execute "call UltiAssertEquals('Dict1 back', " . l:dict1_name .
+                \ ", l:dict1, 'true')"
+    execute "call UltiAssertEquals('Dict2 back', " . l:dict2_name .
+                \ ", l:dict2, 'true')"
+    execute "call UltiAssertEquals('Dict1 and Dict2[Dict1] are equal again'," .
+                \ l:dict1_name . ", " . l:dict2_name . "['dict1'], 'true')"
+    call UltiAssertTrue("Dict3 doesn't exist, again", exists(l:dict3_name),
+                \ 'false')
     " }}}
     " Exceptions {{{
+    let restore = 'UltiTestRestore'
+    let store = 'UltiTestStore'
+    call UltiAssertException('Extraneous general call to Restore does not ' .
+                \ ' throw', restore, [], '', 'false')
+    call UltiAssertException('Extraneous specific call to Restore does throw'
+                \ , restore, ['g:syntax_on'],
+                \ 'Cannot restore unstored variable', 'true')
+    call UltiAssertException('Store complains when no arguments given',
+                \ store, [], "Not enough arguments", 'true')
+    call UltiAssertException('Store complains about numbers', store, [1], 
+                \ "Argument must be a variable name as a string, or a List " .
+                \ "of Strings", 'true')
+    call UltiAssertException('Store complains about dicts', store,
+                \ [{'test': 'dict'}], 
+                \ "Argument must be a variable name as a string, or a List " .
+                \ "of Strings", 'true')
+    call UltiAssertException('Restore complains about non-existent variable',
+                \ restore, [l:dict3_name], "Variable in argument must exist",
+                \ 'true')
+    call UltiAssertException('Restore complains about numbers', restore,
+                \ [2.34], 'Argument must be a String or a List of Strings',
+                \ 'true')
     " }}}
     call UltiTestStop()
     call UltiTestReport()
