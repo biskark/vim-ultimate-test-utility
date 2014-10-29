@@ -1,7 +1,7 @@
 Vim Ultimate Test Utility
 =========================
 
-Introduction                      
+Introduction
 ------------
 
 Ultimate-Test-Utility is the only tool you'll need for creating and running
@@ -17,7 +17,7 @@ Ultimate-Test-Utility can also be found at
 [vim.org](http://www.vim.org/scripts/script.php?script_id=4724), but this is
 not recommended as that won't be as current this repository.
 
-Features and Requirements          
+Features and Requirements
 -------------------------
 
 - Ultimate-Test-Utility is written solely in vimscript so compilation
@@ -26,7 +26,7 @@ Features and Requirements
     - However, Ultimate-Test-Utility must be run in a Vim 7.0 or higher and
       some functions may require read/write access to files you may be using.
       Of course, use those functions with care, though the instances in which
-      these precautions are necessary should be obvious; Ultimate-Test-Utility 
+      these precautions are necessary should be obvious; Ultimate-Test-Utility
       does NOT want to harm your work, it's here to help.
 
     - Also, Ultimate-Test-Utility has included some example functions that
@@ -71,7 +71,7 @@ git checkout latest
 2. unzip archive into .vim
 
 
-Usage                              
+Usage
 -----
 
 Ultimate-Test-Utility has a straightforward API, and is not unlike the Perl
@@ -95,7 +95,7 @@ functions.
 The more complex examples are available in examples.vim.
 
 
-Quick Start Guide                 
+Quick Start Guide
 -----------------
 
 Ultimate-Test-Utility breaks down tests into two categories. Individual
@@ -138,7 +138,7 @@ The basic workflow is simple.
 The next section shows how to setup and run one full "test" on an example
 function.
 
-Basic Examples                    
+Basic Examples
 --------------
 
 Special Note: It's good practice to write your tests before you write the code
@@ -154,7 +154,7 @@ endfunction
 
 Example test function that examines some basic-use cases and possible edge
 cases. Comments have been sprinkled in to explain a little of the API.
-    
+
 ```vim
 function! MultiplyTestOne()
     call UltiTestStart()
@@ -310,7 +310,7 @@ Two quick points, and we can move on to more advanced usage.
    from causing problems.
 
 
-Extended Examples                
+Extended Examples
 -----------------
 
 Let's broaden our look at this plugin be testing some more complicated
@@ -356,7 +356,7 @@ Ok, now let's write those tests.
 ```vim
 function! TestDivide()
     call UltiTestStart("Divide Tests", 5)
-    
+
     " Output tests
     call UltiAssertInOutput('6 / 2 == 3', 'Divide', [6, 2], '3', 'true')
     call UltiAssertInOutput("1 / 3 == 0 ('Testing Int Division')",
@@ -445,7 +445,7 @@ function! TestInsertHello()
     execute 'normal ' . leader . 'S'
     call UltiAssertInBuffer('Testing for "Hello World" presence after normal',
                 \ 'Hello', 'true')
-    
+
     " Clean up the text that was just inserted. Not necessary for the
     " test though.
     execute "s/Hello//"
