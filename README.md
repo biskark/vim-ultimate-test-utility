@@ -55,7 +55,7 @@ languages to be installed.
 
 ```bash
 cd ~/.vim/bundle
-git clone https://github.com/biskark/vim-ultimate-colorscheme-utility.git
+git clone https://github.com/biskark/vim-ultimate-test-utility.git
 ```
 
 That's enough to get the latest stable release, but if you'd like to keep
