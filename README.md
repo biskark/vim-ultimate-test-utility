@@ -282,7 +282,7 @@ function! MultiplyTestTwo()
 endfunction
 
 " Now to run the test
-call MultiplyTestOne()
+call MultiplyTestTwo()
 ```
 
 This should give something like the following as output:
